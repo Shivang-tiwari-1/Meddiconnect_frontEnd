@@ -1,26 +1,32 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 
-interface stateChange {
+interface change {
     isMobile?: boolean;
     gridView?: boolean;
+    isTablet?: boolean;
+}
+const initialState: change = {
+    isMobile: false,
+    gridView: false,
+    isTablet: false
 }
 
-export const StateChange = createSlice({
-    name: "stateChange",
-    initialState: {
-        isMobile: false,
-        gridView: false
-    },
+const StateChange = createSlice({
+    name: "Change",
+    initialState,
     reducers: {
         toggleMobileMode: (state) => {
             state.isMobile = !state.isMobile;
         },
         toogleGridChange: (state) => {
             state.gridView = !state.gridView;
+        },
+        toggleTabletMode: (state) => {
+            state.isTablet = !state.isTablet;
         }
     }
 });
 
-export const { toggleMobileMode, toogleGridChange } = StateChange.actions;
+export const { toggleMobileMode, toogleGridChange, toggleTabletMode } = StateChange.actions;
 export default StateChange.reducer;

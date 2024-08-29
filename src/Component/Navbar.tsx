@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { MdOutlineLightMode } from 'react-icons/md';
 import { primaryGrey, textWhite } from '../Constants';
-import SmallProfileCard from './SmallProfileCard';
+import SmallProfileCard from '../Component/UtilityComponents/SmallProfileCard';
 import { IoNotificationsOutline } from 'react-icons/io5';
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from 'react-router-dom';
@@ -64,7 +64,7 @@ const Navbar = () => {
                                             Home
                                         </div>
                                     </Link>
-                                    <Link to='#'>
+                                    <Link to='/findDoctor'>
                                         <div className='`cursor-pointer hover:bg-primaryBlue px-6 py-2 hover:text-textWhite '>
                                             Doctors
                                         </div>
@@ -144,7 +144,7 @@ const Navbar = () => {
                                                 Home
                                             </Link>
 
-                                            <Link to='#' className='cursor-pointer hover:bg-primaryBlue px-4 py-2 rounded hover:text-textWhite'>
+                                            <Link to='/findDoctor' className='cursor-pointer hover:bg-primaryBlue px-4 py-2 rounded hover:text-textWhite'>
                                                 Doctors
                                             </Link>
 
