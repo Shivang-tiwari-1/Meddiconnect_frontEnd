@@ -15,7 +15,8 @@ interface IData {
   onDeselectstate?: (currentState: string) => void;
   show?: boolean;
   tabletBool?: boolean;
-  mobileBool?:boolean
+  mobileBool?: boolean;
+  isDark?: boolean;
 }
 
 const FilterBar = (props: IData) => {

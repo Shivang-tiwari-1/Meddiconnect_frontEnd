@@ -1,0 +1,11 @@
+/* Add these styles to your global CSS file */
+
+.custom-scrollbar::-webkit-scrollbar {
+    display: none;  /* Hide scrollbar for WebKit browsers */
+  }
+  
+  .custom-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+  

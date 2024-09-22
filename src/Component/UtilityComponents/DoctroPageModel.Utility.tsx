@@ -1,17 +1,26 @@
 import React from "react";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
 import { IoArrowBackCircle } from "react-icons/io5";
-
+import BookApointment from "../Patient/BookApintment/BookApointment.patient";
+import BookeAppointManually from "../Patient/BookApintment/BookeAppointManually";
+import { FaUserDoctor } from "react-icons/fa6";
 interface data {
   name?: string;
   role?: string;
   profileImage?: string;
-  availability?: [];
+  availability?: object[];
   show?: boolean;
   tabletBool?: boolean;
-  handleToggleShow?: () => void;
+  handleToggleShow?: (doctorId: any) => void;
   address?: string;
   history?: string[];
+  show2?: boolean;
+  show3?: boolean;
+  handleToggleShow3?: () => void;
+  handleToggleShow4?: () => void;
+  show4?: boolean;
+  id?: any;
+  key?: any;
 }
 const DoctroPageModel = (props: data) => {
   const {
@@ -23,18 +32,24 @@ const DoctroPageModel = (props: data) => {
     handleToggleShow,
     address,
     history,
+    show2,
+    show3,
+    handleToggleShow3,
+    handleToggleShow4,
+    show4,
+    id,
+    availability,
   } = props;
-
   globalResizeFunction();
-  console.log("tablet", tabletBool);
+
   return (
     <div className="fixed inset-0 flex items-center justify-evenly bg-black bg-opacity-80 ">
       <div className="bg-primaryGrey p-8 rounded-[2rem] shadow-lg w-full max-w-[70%] h-[60vh] flex justify-between laptop:w-[50%] relative">
         <div className="flex justify-evenly flex-col items-start w-[45%]  h-[50vh] ">
           <div className="flex justify-center w-full items-center h-[20vh] ">
-            <div className=" border-2 w-[60%] h-[16vh] rounded-[6rem] flex justify-center items-center shadow-2xl">
+            <div className=" border-2 w-[50%] h-[16vh] rounded-[7rem] flex justify-center items-center shadow-2xl]">
               <img
-                src={profileImage}
+                src={`http://localhost:5000/images/${profileImage}`}
                 alt="Profile"
                 className="w-full h-auto object-cover rounded-full"
               />
@@ -70,11 +85,19 @@ const DoctroPageModel = (props: data) => {
 
             <div className="flex w-full justify-around">
               <div className="bg-primaryGrey w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">
-                <p className="text-primaryBlack text-xl font-bold ">NEXT</p>
+                <p className="text-primaryBlack text-xl font-bold ">
+                  <BookApointment />
+                </p>
               </div>
 
               <div className="bg-primaryRed w-[40%] h-[5vh] rounded-lg flex justify-center items-center">
-                <p className="text-white text-xl font-bold">BOOK</p>
+                {!show4 ? (
+                  <button onClick={handleToggleShow4}>
+                    <FaUserDoctor size={30} />
+                  </button>
+                ) : (
+                  <BookeAppointManually />
+                )}
               </div>
             </div>
           </div>

@@ -1,6 +1,5 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { axiosPrivate } from "../../Api/Axios.Api";
-import { toggleTabletMode } from "./StateChange.slice";
 
 //-----------------------------------interfaces----------------------------------------//
 interface SignupPayload {
@@ -8,8 +7,15 @@ interface SignupPayload {
   email?: string;
   password?: string;
   phone?: number;
+  profileImage?: string | null;
   address?: string;
   role?: string;
+}
+
+interface Credentials {
+  email: string;
+  password: string;
+  role: string;
 }
 
 interface stateManagement {
@@ -27,44 +33,90 @@ interface stateManagement {
   laptopBool?: boolean;
   tabletBool?: boolean;
   mobileBool?: boolean;
+  alert: string | null;
+  status?: number | null;
+  credentials?: Credentials;
+  hoveredField?: string;
 }
+
 //-----------------------------------interfaces----------------------------------------//
 
 //-----------------------------------API-----------------------------------------------//
+
 export const signup = createAsyncThunk(
   "user/signup",
   async (
-    { name, email, password, phone, address, role }: SignupPayload,
-    { rejectWithValue }
+    formData: FormData, // Accept FormData instead of SignupPayload
+    { dispatch, rejectWithValue }
   ) => {
     try {
-      const response = await axiosPrivate.post(`/api/patient/createuser`, {
-        name: name,
-        email: email,
-        password: password,
-        phone: phone,
-        address: address,
-        role: role,
-      });
+      const response = await axiosPrivate.post(
+        `/api/patient/createuser`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
       console.log("response->", response);
-      return response?.data;
+
+      if (response) {
+        dispatch(toggleAlertCheck("User registered successfully"));
+        dispatch(toggleStatusCheck(200));
+        return response.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All fields are required"));
+        dispatch(toggleStatusCheck(401));
+      } else {
+        dispatch(toggleAlertCheck("An error occurred"));
+        dispatch(toggleStatusCheck(500));
+      }
+
       return rejectWithValue(error?.response?.data);
     }
   }
 );
 export const login = createAsyncThunk(
   "user/login",
-  async ({ email, password, role }: SignupPayload, { rejectWithValue }) => {
+  async (
+    { email, password, role }: SignupPayload,
+    { dispatch, rejectWithValue }
+  ) => {
     try {
       const response = await axiosPrivate.post(`api/patient/login`, {
-        email: email,
-        password: password,
-        role: role,
+        email,
+        password,
+        role,
       });
-      console.log(response);
-      return response?.data;
+
+      if (response) {
+        dispatch(toggleAlertCheck("User logged in"));
+        dispatch(toggleStatusCheck(200));
+        return response?.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All filds are required"));
+        dispatch(toggleStatusCheck(403));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -86,6 +138,14 @@ const initialState: stateManagement = {
   mobileBool: false,
   tabletBool: false,
   laptopBool: false,
+  alert: null,
+  status: null,
+  credentials: {
+    email: "",
+    password: "",
+    role: "",
+  },
+  hoveredField: "",
 };
 
 const signup_login = createSlice({
@@ -112,6 +172,24 @@ const signup_login = createSlice({
     },
     toogleLaptopCheck: (state) => {
       state.laptopBool = !state.laptopBool;
+    },
+    toggleAlertCheck: (state, action) => {
+      state.alert = action.payload;
+    },
+    toggleStatusCheck: (state, action) => {
+      state.status = action.payload;
+    },
+    setCredentials: (
+      state,
+      action: PayloadAction<{ field: keyof Credentials; value: string }>
+    ) => {
+      const { field, value } = action.payload;
+      if (state.credentials) {
+        state.credentials[field] = value;
+      }
+    },
+    setHoverField: (state, action) => {
+      state.hoveredField = action.payload;
     },
   },
   extraReducers: (builders) => {
@@ -151,6 +229,10 @@ export const {
   toogleMobileCheck,
   toggleTabletCheck,
   toogleLaptopCheck,
+  toggleAlertCheck,
+  toggleStatusCheck,
+  setCredentials,
+  setHoverField,
 } = signup_login.actions;
 
 export default signup_login.reducer;

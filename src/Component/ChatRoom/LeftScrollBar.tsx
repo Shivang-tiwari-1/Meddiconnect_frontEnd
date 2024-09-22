@@ -1,46 +1,88 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
+import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
+import { setSearchQuery } from "../../Redux/slices/Patient.Redux";
+import Profile from "./Profile";
 
-const LeftScrollBar = () => {
-    const data = [
-        'Apple',
-        'Banana',
-        'Orange',
-        'Mango',
-        'Pineapple',
-        'Grapes'
-    ];
-
-    const [searchQuery, setSearchQuery] = useState('');
-
-    const filteritems = data.filter(item => item.toLowerCase().includes(searchQuery.toLowerCase()));
-    return (
-        <div className='flex flex-col items-center border-2 shadow-lg rounded-md w-[100%] h-full p-4 space-y-4'>
-            <div className='w-full rounded-full border-b-2 border-gray-300 outline-none shadow-lg'>
-                <input
-                    className="w-full h-[2.5rem] outline-none  placeholder-gray-500 px-4"
-                    type="text"
-                    placeholder='search'
-                    id="serach"
-                    name="search"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                />
-            </div>
-
-            <div className="flex flex-col w-full space-y-2">
-                {searchQuery.length === 0 ? data.map((item, index) => (
-                    <div key={index} className='bg-white shadow-md border border-gray-200 rounded-md p-2 h-[7rem] flex items-center'>
-                        <p className='flex-grow text-left'>{item}</p>
-                    </div>
-                )) : filteritems.map((item, index) => (
-                    <div key={index} className='bg-white shadow-md border border-gray-200 rounded-md p-2 h-[7rem] flex items-center'>
-                        <p className='flex-grow text-left'>{item}</p>
-                    </div>
-                ))}
-            </div>
-
-        </div>
-    )
+interface incomingData {
+  show?: boolean;
+  name?: string;
+  profileImage?: string;
+  handleToggleShow?: (id: string) => void;
+  openDoctorId?: string | null;
+  key?: string;
+  doctors?: [] | null;
+  isDark?: boolean;
 }
 
-export default LeftScrollBar
+const LeftScrollBar = ({
+  show,
+  name,
+  profileImage,
+  handleToggleShow,
+  openDoctorId,
+  key,
+  doctors,
+  isDark,
+}: incomingData) => {
+  //****************************LOGS****************************************/
+ 
+
+  //**************************VARIABLES***********************************/
+
+  //****************************APP_SELECTORS*******************************/
+  const { searchQuery } = useAppSelector((state) => state?.patient);
+  //*****************************DIPATCH************************************/
+  const dispatch = useAppDispatch();
+
+  const handleinput = (e: any) => {
+    const { value, name } = e.target;
+    dispatch(
+      setSearchQuery({ field: name as keyof typeof searchQuery, value })
+    );
+  };
+
+  return (
+    <div
+      className={`flex flex-col items-center border-2 shadow-lg rounded-md w-[100%] h-full p-4 space-y-4 `}
+    >
+      <div
+        className={`w-full ${
+          !isDark ? "border-b-2 border-gray-300 outline-none shadow-lg" : ""
+        }`}
+      >
+        <input
+          className={`w-full h-[2.5rem] outline-none  ${
+            isDark ? "bg-slate-700" : "bg-white"
+          } placeholder-gray-500 px-4 rounded-full`}
+          type="text"
+          placeholder="name"
+          id="name"
+          name="name"
+          value={searchQuery?.name}
+          onChange={handleinput}
+        />
+      </div>
+
+      {doctors?.map((data) => (
+        <button
+          className="flex  w-full space-y-2  h-[6vh] p-2  border-b-[0.25px] items-center"
+          onClick={() => handleToggleShow?.(data?._id)}
+        >
+          <div className=" flex gap-2 w-full" key={data?._id}>
+            <div className="px-2 w-[70px] h-[50px]">
+              <img
+                src={`http://localhost:5000/images/${data?.profileImage}`}
+                alt="Profile"
+                className="w-full h-full object-contain rounded-full"
+              />
+            </div>
+
+            <div className="text-sm font-light">{data?.name}</div>
+          </div>
+        </button>
+      ))}
+    </div>
+  );
+};
+
+export default LeftScrollBar;

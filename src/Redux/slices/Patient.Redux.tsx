@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { axiosPrivate } from "../../Api/Axios.Api";
+import { toggleAlertCheck, toggleStatusCheck } from "./signup_login.";
 
 //-----------------------------------interfaces----------------------------------------//
 interface patientPayload {
@@ -7,14 +8,23 @@ interface patientPayload {
   day: string | null;
   time: string | null;
 }
+interface searchQuery {
+  name: string;
+}
 interface patientState {
   doctors?: [];
   loading?: boolean;
   patientData?: object;
   show?: boolean;
+  show2?: boolean;
+  show3?: boolean;
   doctorDetails?: object;
   Appointmenthistory?: [];
   error?: boolean;
+  hoveredField?: string;
+  show4?: boolean;
+  searchQuery?: searchQuery;
+  showDoctorByid?: object | null;
 }
 
 //-----------------------------------interfaces----------------------------------------//
@@ -22,12 +32,25 @@ interface patientState {
 //-----------------------------------API-----------------------------------------------//
 export const fetchAllDoctors = createAsyncThunk(
   "patient/fetchAllDoctors",
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.get(`/api/patient/fetchalldoctors`);
-      console.log("response getdoctro->", response?.data?.data);
-      return response?.data?.data;
+
+      if (response) {
+        return response?.data?.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -35,12 +58,22 @@ export const fetchAllDoctors = createAsyncThunk(
 
 export const getUserData = createAsyncThunk(
   "patient/getUserData",
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.get(`/api/patient/getData`);
-      console.log("response->redux", response);
       return response?.data;
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -48,14 +81,28 @@ export const getUserData = createAsyncThunk(
 
 export const BookAppointMent = createAsyncThunk(
   "patient/BookAppointMent",
-  async (id, { rejectWithValue }) => {
+  async (id, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.post(
         `/api/patient/makeappointment/${id}`
       );
-      console.log("response->", response);
-      return response?.data;
+      if (response) {
+        dispatch(toggleAlertCheck("Appointment Booked"));
+        dispatch(toggleStatusCheck(200));
+        return response?.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -63,14 +110,28 @@ export const BookAppointMent = createAsyncThunk(
 
 export const CancleAppointment = createAsyncThunk(
   "patient/CancleAppointment",
-  async (id, { rejectWithValue }) => {
+  async (id, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.post(
         `/api/patient/cancleappointment/${id}`
       );
-      console.log("response->", response);
-      return response?.data;
+      if (response) {
+        dispatch(toggleAlertCheck("Appointment cancled"));
+        dispatch(toggleStatusCheck(200));
+        return response?.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -78,12 +139,26 @@ export const CancleAppointment = createAsyncThunk(
 
 export const history = createAsyncThunk(
   "patient/history",
-  async (_, { rejectWithValue }) => {
+  async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.get(`/api/patient/history`);
-      console.log("response->", response);
       return response?.data;
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All fields are required"));
+        dispatch(toggleStatusCheck(401));
+      }
+
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -91,7 +166,7 @@ export const history = createAsyncThunk(
 
 export const BookAppointmentManually = createAsyncThunk(
   "patient/BookAppointmentManually",
-  async ({ day, time, id }: patientPayload, { rejectWithValue }) => {
+  async ({ day, time, id }: patientPayload, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.post(
         `/api/patient/makeappointment_manually/${id}`,
@@ -100,9 +175,26 @@ export const BookAppointmentManually = createAsyncThunk(
           time: time,
         }
       );
-      console.log("response->", response);
-      return response?.data;
+      if (response) {
+        dispatch(toggleAlertCheck("Appointment Booked"));
+        dispatch(toggleStatusCheck(200));
+        return response?.data;
+      }
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All fields are required"));
+        dispatch(toggleStatusCheck(401));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -110,14 +202,27 @@ export const BookAppointmentManually = createAsyncThunk(
 
 export const getDoctorDetails = createAsyncThunk(
   "patient/getDoctorDetails",
-  async (id, { rejectWithValue }) => {
+  async (id, { dispatch, rejectWithValue }) => {
     try {
       const resposne = await axiosPrivate.get(
         `/api/patient/doctorDetail/${id}`
       );
-      console.log("response getdoctro->", resposne?.data?.data?.data);
       return resposne?.data?.data;
     } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 500) {
+        dispatch(toggleAlertCheck("Technical error occured"));
+        dispatch(toggleStatusCheck(500));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All fields are required"));
+        dispatch(toggleStatusCheck(401));
+      }
       return rejectWithValue(error?.response?.data);
     }
   }
@@ -132,6 +237,13 @@ const initialState: patientState = {
   doctorDetails: {},
   error: false,
   Appointmenthistory: [],
+  show2: false,
+  show3: false,
+  show4: false,
+  searchQuery: {
+    name: "",
+  },
+  showDoctorByid: null,
 };
 
 const patientState = createSlice({
@@ -140,6 +252,29 @@ const patientState = createSlice({
   reducers: {
     toogleShow: (state) => {
       state.show = !state.show;
+    },
+    toogleShow2: (state) => {
+      state.show2 = !state.show2;
+    },
+    toogleShow3: (state) => {
+      state.show3 = !state.show3;
+    },
+    toogleShow4: (state) => {
+      state.show4 = !state.show4;
+    },
+    setSearchQuery: (
+      state,
+      action: PayloadAction<{ field: keyof searchQuery; value: string }>
+    ) => {
+      const { field, value } = action?.payload;
+      if (state?.searchQuery) {
+        state.searchQuery[field] = value;
+      }
+    },
+    setOpenDoctorById: (state, action) => {
+      state.showDoctorByid = state?.doctors?.find((slot) => {
+        return slot?._id === action?.payload;
+      });
     },
   },
   extraReducers: (builders) => {
@@ -163,7 +298,6 @@ const patientState = createSlice({
       .addCase(getUserData.fulfilled, (state, action) => {
         state.loading = false;
         state.patientData = action?.payload;
-        console.log("->->", action?.payload);
       })
       .addCase(BookAppointMent.pending, (state) => {})
       .addCase(BookAppointMent.rejected, (state, action) => {})
@@ -180,8 +314,9 @@ const patientState = createSlice({
       })
       .addCase(history.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("->",action?.payload?.data)
+
         state.Appointmenthistory = action?.payload?.data;
+        console.log("historyhere->", state.Appointmenthistory);
       })
       .addCase(BookAppointmentManually.pending, (state) => {})
       .addCase(BookAppointmentManually.rejected, (state, action) => {})
@@ -192,5 +327,12 @@ const patientState = createSlice({
   },
 });
 
-export const { toogleShow } = patientState.actions;
+export const {
+  toogleShow,
+  toogleShow2,
+  toogleShow3,
+  toogleShow4,
+  setSearchQuery,
+  setOpenDoctorById,
+} = patientState.actions;
 export default patientState.reducer;

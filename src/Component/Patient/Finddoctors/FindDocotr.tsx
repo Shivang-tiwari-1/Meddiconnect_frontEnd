@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import FilterBar from "./FilterBar";
 import { IoClose } from "react-icons/io5";
 import { useAppDispatch, useAppSelector } from "../../../Redux/Store/Store";
-import { useActionData } from "react-router-dom";
 import { toogleGridChange } from "../../../Redux/slices/StateChange.slice";
 import { BsGrid } from "react-icons/bs";
 import { TfiViewList } from "react-icons/tfi";
@@ -18,17 +17,18 @@ import { globalResizeFunction } from "../../../Utility/resizer.Utils";
 const FindDoctor = () => {
   const [selectedState, setSelectedState] = useState<string[]>([]);
   const dispatch = useAppDispatch();
-  const { tabletBool, mobileBool } =
-    useAppSelector((state) => state.states);
+  const { tabletBool, mobileBool } = useAppSelector((state) => state.states);
   const { show } = useAppSelector((state) => state.patient);
+  const { isDark } = useAppSelector((state) => state.stateChange);
+  const [openDoctorId, setOpenDoctorId] = useState<string | null>(null);
 
-  console.log(tabletBool, mobileBool);
-
-
-  const handleToggleShow = () => {
-    dispatch(toogleShow());
+  const handleToggleShow = (doctorId: string | null) => {
+    if (openDoctorId === doctorId) {
+      setOpenDoctorId(null);
+    } else {
+      setOpenDoctorId(doctorId);
+    }
   };
-
   globalResizeFunction();
 
   useEffect(() => {
@@ -37,7 +37,6 @@ const FindDoctor = () => {
 
   const { gridView } = useAppSelector((state) => state.stateChange);
   const { doctors } = useAppSelector((state) => state.patient);
-
 
   const clearFilter = () => {
     setSelectedState([]);
@@ -89,8 +88,8 @@ const FindDoctor = () => {
     text3: "nearby",
   };
   return (
-    <div className="flex">
-      <div className='"dark:bg-bgColorDarkBlack  bg:text-textWhite'>
+    <div className={`flex  ${isDark ? "dark" : ""}`}>
+      <div className="dark:bg-bgColorDarkBlack  bg:text-textWhite">
         <FilterBar
           locality={data?.locality}
           speacilist={data?.speacilist}
@@ -104,11 +103,12 @@ const FindDoctor = () => {
           show={show}
           tabletBool={tabletBool}
           mobileBool={mobileBool}
+          isDark={isDark}
         />
       </div>
       <div className="w-[85vw] bg-[#dadada] dark:bg-bgColorDarkBlack ">
         <div className="px-4">
-          {/**Selected filterside bar content grid change and clear filter  */}
+          {/**Selected filterside bar content grid change and clear filter**/}
           <div className="flex justify-between items-center">
             <div className=" flex flex-col font-[600] text-[18px] dark:text-textWhite py-4">
               1,235(Doctors available)
@@ -159,65 +159,34 @@ const FindDoctor = () => {
               </div>
             </div>
           </div>
-
           {/* mapping the Doctors*/}
-          {tabletBool && !mobileBool  ? (
-            !gridView ? (
-              <div className={`grid-cols-2 grid gap-4 py-4 px-4  `}>
-                {doctors.map((doctor) => (
-                  <Doctors
-                    key={doctor?._id}
-                    name={doctor?.name}
-                    availability={doctor?.availability}
-                    profileImage={doctor?.profileImage}
-                    address={doctor?.address}
-                    history={doctor?.history}
-                    role={doctor?.role}
-                    show={show}
-                    tabletBool={tabletBool}
-                    handleToggleShow={handleToggleShow}
-                    mobileBool={mobileBool}
-
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className={`grid-row grid gap-4 py-4 px-4  `}>
-                {doctors.map((doctor) => (
-                  <Doctors
-                    key={doctor?._id}
-                    name={doctor?.name}
-                    availability={doctor?.availability}
-                    profileImage={doctor?.profileImage}
-                    role={doctor?.role}
-                    show={show}
-                    tabletBool={tabletBool}
-                    handleToggleShow={handleToggleShow}
-                    mobileBool={mobileBool}
-
-                  />
-                ))}
-              </div>
-            )
-          ) : !gridView ? (
-            <div className={`grid-cols-4  grid  gap-4 py-4 px-4  `}>
+          {!gridView ? (
+            <div
+              className={`grid-cols-2 desktop:grid-cols-2 grid gap-4 py-4 px-4  `}
+            >
               {doctors.map((doctor) => (
                 <Doctors
                   key={doctor?._id}
                   name={doctor?.name}
                   availability={doctor?.availability}
                   profileImage={doctor?.profileImage}
+                  address={doctor?.address}
+                  history={doctor?.history}
                   role={doctor?.role}
                   show={show}
                   tabletBool={tabletBool}
                   handleToggleShow={handleToggleShow}
                   mobileBool={mobileBool}
-
+                  isDark={isDark}
+                  id={doctor?._id}
+                  openDoctorId={openDoctorId}
                 />
               ))}
             </div>
           ) : (
-            <div className={`grid-cols-3 grid  gap-4 py-4 px-4  `}>
+            <div
+              className={`grid-cols desktop:grid-cols-3 mobile:grid-rows-1 grid gap-4 py-4 px-4  `}
+            >
               {doctors.map((doctor) => (
                 <Doctors
                   key={doctor?._id}
@@ -229,7 +198,9 @@ const FindDoctor = () => {
                   tabletBool={tabletBool}
                   handleToggleShow={handleToggleShow}
                   mobileBool={mobileBool}
-
+                  isDark={isDark}
+                  id={doctor?._id}
+                  openDoctorId={openDoctorId}
                 />
               ))}
             </div>

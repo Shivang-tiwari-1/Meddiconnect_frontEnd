@@ -1,4 +1,3 @@
-/** @type {import('tailwindcss').Config} */
 export default {
   content: [
     "./index.html",
@@ -14,28 +13,33 @@ export default {
       colors: {
         'primaryBlue': '#475be8',
         'secondaryBlue': '#dadefa',
-        'hoverBlue': '##5367f5',
+        'hoverBlue': '#5367f5',
         'primaryBlack': '#11142d',
         'primaryGrey': '#808191',
         'primaryGreen': '#2ed480',
         'primaryRed': '#eb5757',
         'primaryYellow': '#f2c94c',
 
-        //Dark mode
+        // Dark mode
         'bgColorDarkBlack': '#111315',
         'lightBlack': '#1a1d1f',
         'textWhite': '#efefef',
         'textGrey': '#6f767e',
       },
       screens: {
-
         'mobile': '375px',
-
         'tablet': '601px',
-
         'laptop': '1024px',
-
         'desktop': '1280px',
+      },
+      fontFamily: {
+        apple: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+      },
+      fontSize: {
+        'apple-lg': '18px',
+      },
+      letterSpacing: {
+        tighter: '0.02em',
       },
     },
   },
