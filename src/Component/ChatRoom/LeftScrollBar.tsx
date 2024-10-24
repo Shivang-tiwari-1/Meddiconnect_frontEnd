@@ -24,16 +24,13 @@ const LeftScrollBar = ({
   doctors,
   isDark,
 }: incomingData) => {
-  //****************************LOGS****************************************/
- 
-
-  //**************************VARIABLES***********************************/
-
   //****************************APP_SELECTORS*******************************/
   const { searchQuery } = useAppSelector((state) => state?.patient);
-  //*****************************DIPATCH************************************/
+
+  //*******************************DIPATCH************************************/
   const dispatch = useAppDispatch();
 
+  //******************************FUNCTIONS************************************/
   const handleinput = (e: any) => {
     const { value, name } = e.target;
     dispatch(
@@ -41,6 +38,15 @@ const LeftScrollBar = ({
     );
   };
 
+  //******************************VARIABLES***********************************/
+
+  //******************************DATATYPESMETHODS*******************************/
+  const filterResults = doctors?.filter((doctor) =>
+    doctor?.name.toLowerCase().includes(searchQuery?.name?.toLowerCase() || 0)
+  );
+  //*********************************LOGS****************************************/
+
+  //**********************************HTML-CSS**************************************/
   return (
     <div
       className={`flex flex-col items-center border-2 shadow-lg rounded-md w-[100%] h-full p-4 space-y-4 `}
@@ -63,24 +69,43 @@ const LeftScrollBar = ({
         />
       </div>
 
-      {doctors?.map((data) => (
-        <button
-          className="flex  w-full space-y-2  h-[6vh] p-2  border-b-[0.25px] items-center"
-          onClick={() => handleToggleShow?.(data?._id)}
-        >
-          <div className=" flex gap-2 w-full" key={data?._id}>
-            <div className="px-2 w-[70px] h-[50px]">
-              <img
-                src={`http://localhost:5000/images/${data?.profileImage}`}
-                alt="Profile"
-                className="w-full h-full object-contain rounded-full"
-              />
-            </div>
+      {filterResults?.length === 0
+        ? doctors?.map((data) => (
+            <button
+              className="flex  w-full space-y-2  h-[6vh] p-2  border-b-[0.25px] items-center"
+              onClick={() => handleToggleShow?.(data?._id)}
+            >
+              <div className=" flex gap-2 w-full" key={data?._id}>
+                <div className="px-2 w-[70px] h-[50px]">
+                  <img
+                    src={`http://localhost:5000/images/${data?.profileImage}`}
+                    alt="Profile"
+                    className="w-full h-full object-contain rounded-full"
+                  />
+                </div>
 
-            <div className="text-sm font-light">{data?.name}</div>
-          </div>
-        </button>
-      ))}
+                <div className="text-sm font-light">{data?.name}</div>
+              </div>
+            </button>
+          ))
+        : filterResults?.map((data) => (
+            <button
+              className="flex  w-full space-y-2  h-[6vh] p-2  border-b-[0.25px] items-center"
+              onClick={() => handleToggleShow?.(data?._id)}
+            >
+              <div className=" flex gap-2 w-full" key={data?._id}>
+                <div className="px-2 w-[70px] h-[50px]">
+                  <img
+                    src={`http://localhost:5000/images/${data?.profileImage}`}
+                    alt="Profile"
+                    className="w-full h-full object-contain rounded-full"
+                  />
+                </div>
+
+                <div className="text-sm font-light">{data?.name}</div>
+              </div>
+            </button>
+          ))}
     </div>
   );
 };

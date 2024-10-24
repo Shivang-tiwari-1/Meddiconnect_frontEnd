@@ -1,4 +1,3 @@
-// Alert.Utility.tsx
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import {
@@ -6,6 +5,8 @@ import {
   toggleStatusCheck,
 } from "../../Redux/slices/signup_login.";
 import React from "react";
+
+
 const Alert = () => {
   const dispatch = useAppDispatch();
   const { alert, status } = useAppSelector((state) => state.states);

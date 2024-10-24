@@ -26,7 +26,6 @@ const FinalChatroom = () => {
     dispatch(toogleShow());
   };
 
-  console.log("showDoctorByid", showDoctorByid);
   return (
     <div
       className={`h-screen w-full flex ${

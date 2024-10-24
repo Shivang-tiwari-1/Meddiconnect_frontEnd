@@ -51,7 +51,7 @@ export const signup = createAsyncThunk(
   ) => {
     try {
       const response = await axiosPrivate.post(
-        `/api/patient/createuser`,
+        `/api/authenticate/createuser`,
         formData,
         {
           headers: {
@@ -87,6 +87,7 @@ export const signup = createAsyncThunk(
     }
   }
 );
+
 export const login = createAsyncThunk(
   "user/login",
   async (
@@ -94,16 +95,42 @@ export const login = createAsyncThunk(
     { dispatch, rejectWithValue }
   ) => {
     try {
-      const response = await axiosPrivate.post(`api/patient/login`, {
+      const response = await axiosPrivate.post(`api/authenticate/login`, {
         email,
         password,
         role,
       });
-
       if (response) {
         dispatch(toggleAlertCheck("User logged in"));
         dispatch(toggleStatusCheck(200));
         return response?.data;
+      }
+    } catch (error) {
+      const statusCode = error?.response?.status;
+      console.log(statusCode)
+      if (statusCode === 400) {
+        dispatch(toggleAlertCheck("Wrong credentials"));
+        dispatch(toggleStatusCheck(400));
+      } else if (statusCode === 403) {
+        dispatch(toggleAlertCheck("User not found"));
+        dispatch(toggleStatusCheck(403));
+      } else if (statusCode === 401) {
+        dispatch(toggleAlertCheck("All filds are required"));
+        dispatch(toggleStatusCheck(403));
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const logout = createAsyncThunk(
+  "user/logout",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const resposne = await axiosPrivate.post("api/authenticate/logout");
+      if (resposne) {
+        dispatch(toggleAlertCheck("loggedout successfully"));
+        dispatch(toggleStatusCheck(200));
       }
     } catch (error) {
       const statusCode = error?.response?.status;
@@ -116,6 +143,23 @@ export const login = createAsyncThunk(
       } else if (statusCode === 401) {
         dispatch(toggleAlertCheck("All filds are required"));
         dispatch(toggleStatusCheck(403));
+      }
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
+export const refresh = createAsyncThunk(
+  "user/refreshToken",
+  async (_, { dispatch, rejectWithValue }) => {
+    try {
+      const response = await axiosPrivate.get("api/authenticate/refreshToken");
+      console.log(response);
+      return response?.data;
+    } catch (error) {
+      const statusCode = error?.response?.status;
+      if (statusCode === 500) {
+        dispatch(toggleAlertCheck("could not retrive the token "));
       }
       return rejectWithValue(error?.response?.data);
     }
@@ -151,6 +195,7 @@ const initialState: stateManagement = {
 const signup_login = createSlice({
   name: "states",
   initialState,
+  //-------------------------------Reducers-for-state-------------------------------//
   reducers: {
     toggleShowPassword: (state) => {
       state.showPassword = !state.showPassword;
@@ -192,6 +237,7 @@ const signup_login = createSlice({
       state.hoveredField = action.payload;
     },
   },
+  //-------------------------------Builders-for-quaries-------------------------------//
   extraReducers: (builders) => {
     builders
       .addCase(signup.pending, (state) => {
@@ -214,9 +260,32 @@ const signup_login = createSlice({
         state.accessToken = action?.payload?.data?.accessToken;
         state.refreshToken = action?.payload?.data?.refreshToken;
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(login.rejected, (state) => {
         state.loading = true;
         state.error = null;
+      })
+      .addCase(logout.fulfilled, (state) => {
+        state.accessToken = null;
+        state.refreshToken = null;
+        state.loading = false;
+      })
+      .addCase(logout.rejected, (state) => {
+        state.loading = false;
+      })
+      .addCase(logout.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(refresh.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(refresh?.fulfilled, (state, action) => {
+        console.log(action);
+        const { accessToken, refreshToken } = action?.payload;
+        state.accessToken = accessToken;
+        state.refreshToken = refreshToken;
+      })
+      .addCase(refresh?.rejected, (state) => {
+        state.loading = false;
       });
   },
 });

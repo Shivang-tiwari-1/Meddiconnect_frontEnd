@@ -25,6 +25,7 @@ interface patientState {
   show4?: boolean;
   searchQuery?: searchQuery;
   showDoctorByid?: object | null;
+  openDoctorId?: string | null;
 }
 
 //-----------------------------------interfaces----------------------------------------//
@@ -39,6 +40,7 @@ export const fetchAllDoctors = createAsyncThunk(
       if (response) {
         return response?.data?.data;
       }
+     
     } catch (error) {
       const statusCode = error?.response?.status;
       if (statusCode === 400) {
@@ -82,6 +84,7 @@ export const getUserData = createAsyncThunk(
 export const BookAppointMent = createAsyncThunk(
   "patient/BookAppointMent",
   async (id, { dispatch, rejectWithValue }) => {
+    console.log(id);
     try {
       const response = await axiosPrivate.post(
         `/api/patient/makeappointment/${id}`
@@ -262,6 +265,9 @@ const patientState = createSlice({
     toogleShow4: (state) => {
       state.show4 = !state.show4;
     },
+    setOpenDoctorId: (state, action) => {
+      state.openDoctorId = action?.payload;
+    },
     setSearchQuery: (
       state,
       action: PayloadAction<{ field: keyof searchQuery; value: string }>
@@ -287,6 +293,7 @@ const patientState = createSlice({
       })
       .addCase(fetchAllDoctors?.fulfilled, (state, action) => {
         state.loading = true;
+        console.log("action.payload",action?.payload)
         state.doctors = action?.payload;
       })
       .addCase(getUserData.pending, (state) => {
@@ -299,9 +306,16 @@ const patientState = createSlice({
         state.loading = false;
         state.patientData = action?.payload;
       })
-      .addCase(BookAppointMent.pending, (state) => {})
-      .addCase(BookAppointMent.rejected, (state, action) => {})
-      .addCase(BookAppointMent.fulfilled, (state, action) => {})
+      .addCase(BookAppointMent.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(BookAppointMent.rejected, (state, action) => {
+        state.loading = false;
+      })
+      .addCase(BookAppointMent.fulfilled, (state, action) => {
+        state.show = false;
+        state.loading = false;
+      })
       .addCase(CancleAppointment.pending, (state) => {})
       .addCase(CancleAppointment.rejected, (state, action) => {})
       .addCase(CancleAppointment.fulfilled, (state, action) => {})
@@ -334,5 +348,6 @@ export const {
   toogleShow4,
   setSearchQuery,
   setOpenDoctorById,
+  setOpenDoctorId
 } = patientState.actions;
 export default patientState.reducer;

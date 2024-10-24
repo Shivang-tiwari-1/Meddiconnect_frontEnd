@@ -1,3 +1,5 @@
+import { io } from "socket.io-client";
+
 export const primaryBlue = "#475be8";
 export const secondaryBlue = "#dadefa";
 export const hoverBlue = "#2e40bf";
@@ -17,4 +19,6 @@ export const textGrey = "#6f767e";
 export const searchButtonStyles =
   "hover:shadow-md hover:w-32 transition-width duration-300 ease-in-out";
 
-
+export const socket = io("http://localhost:5000", {
+  withCredentials: false,
+});

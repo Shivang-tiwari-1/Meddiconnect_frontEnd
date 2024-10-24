@@ -8,7 +8,9 @@ import { BsGrid } from "react-icons/bs";
 import { TfiViewList } from "react-icons/tfi";
 import { CiUndo } from "react-icons/ci";
 import {
+  BookAppointMent,
   fetchAllDoctors,
+  setOpenDoctorId,
   toogleShow,
 } from "../../../Redux/slices/Patient.Redux";
 import Doctors from "./Doctors";
@@ -17,26 +19,29 @@ import { globalResizeFunction } from "../../../Utility/resizer.Utils";
 const FindDoctor = () => {
   const [selectedState, setSelectedState] = useState<string[]>([]);
   const dispatch = useAppDispatch();
-  const { tabletBool, mobileBool } = useAppSelector((state) => state.states);
-  const { show } = useAppSelector((state) => state.patient);
-  const { isDark } = useAppSelector((state) => state.stateChange);
-  const [openDoctorId, setOpenDoctorId] = useState<string | null>(null);
+  //--------------------------------------------App-selectors---------------------------------//
 
+  const { tabletBool, mobileBool } = useAppSelector((state) => state.states);
+  const { show, show2, show3, show4, openDoctorId } = useAppSelector(
+    (state) => state.patient
+  );
+  const { isDark } = useAppSelector((state) => state.stateChange);
+  const { gridView } = useAppSelector((state) => state.stateChange);
+  const { doctors } = useAppSelector((state) => state.patient);
+
+  //--------------------------------------------functions---------------------------------//
   const handleToggleShow = (doctorId: string | null) => {
     if (openDoctorId === doctorId) {
-      setOpenDoctorId(null);
+      dispatch(setOpenDoctorId(null));
     } else {
-      setOpenDoctorId(doctorId);
+      dispatch(setOpenDoctorId(doctorId));
     }
   };
   globalResizeFunction();
 
   useEffect(() => {
     dispatch(fetchAllDoctors());
-  }, []);
-
-  const { gridView } = useAppSelector((state) => state.stateChange);
-  const { doctors } = useAppSelector((state) => state.patient);
+  }, [dispatch]);
 
   const clearFilter = () => {
     setSelectedState([]);
@@ -51,7 +56,7 @@ const FindDoctor = () => {
       prevCriteria.filter((item) => item !== currentState)
     );
   };
-
+console.log(doctors)
   const data = {
     locality: [
       "Downtown",
@@ -106,15 +111,15 @@ const FindDoctor = () => {
           isDark={isDark}
         />
       </div>
-      <div className="w-[85vw] bg-[#dadada] dark:bg-bgColorDarkBlack ">
+      <div className="w-[85vw] bg-[#dadada] dark:bg-bgColorDarkBlack  dark:text-textWhite ">
         <div className="px-4">
           {/**Selected filterside bar content grid change and clear filter**/}
           <div className="flex justify-between items-center">
-            <div className=" flex flex-col font-[600] text-[18px] dark:text-textWhite py-4">
+            <div className=" flex flex-col font-[600] text-[18px] py-4">
               1,235(Doctors available)
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex gap-4 ">
               {selectedState.map((item: string, index: number) => (
                 <div
                   key={index}
@@ -131,7 +136,7 @@ const FindDoctor = () => {
               ))}
             </div>
 
-            <div className="flex gap-4 bg-textWhite ps-4 rounded-lg">
+            <div className="flex gap-4 bg-textWhite ps-4 rounded-lg dark:bg-primaryBlack">
               {gridView ? (
                 <div
                   aria-label="Grid View"
@@ -180,6 +185,9 @@ const FindDoctor = () => {
                   isDark={isDark}
                   id={doctor?._id}
                   openDoctorId={openDoctorId}
+                  show4={show4}
+                  Max={doctor?.Max}
+                  BookAppointment={BookAppointMent}
                 />
               ))}
             </div>
@@ -193,6 +201,8 @@ const FindDoctor = () => {
                   name={doctor?.name}
                   availability={doctor?.availability}
                   profileImage={doctor?.profileImage}
+                  address={doctor?.address}
+                  history={doctor?.history}
                   role={doctor?.role}
                   show={show}
                   tabletBool={tabletBool}
@@ -201,6 +211,9 @@ const FindDoctor = () => {
                   isDark={isDark}
                   id={doctor?._id}
                   openDoctorId={openDoctorId}
+                  show4={show4}
+                  Max={doctor?.Max}
+                  BookAppointment={BookAppointMent}
                 />
               ))}
             </div>

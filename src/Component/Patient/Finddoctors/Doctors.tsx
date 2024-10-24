@@ -20,6 +20,8 @@ interface doctros {
   isDark?: boolean;
   id?: any;
   openDoctorId: string | null;
+  Max?: number;
+  BookAppointment?: () => void;
 }
 
 const Doctors = ({
@@ -40,13 +42,18 @@ const Doctors = ({
   isDark,
   id,
   openDoctorId,
+  Max,
 }: doctros) => {
   const isOpen = openDoctorId === id;
+  const now = new Date();
+  const currentDate = now
+    ?.toLocaleDateString("en-US", { weekday: "long" })
+    .toLowerCase();
   return (
     <div
       className={`border rounded-[50px] w-[100%] bg-white opacity-9 shadow-2xl ${
         isDark ? "dark" : ""
-      }  dark:bg-primaryGrey  `}
+      }  dark:bg-bgColorDarkBlack  `}
     >
       <div className="w-full tablet:w-full tablet:h-[100px] rounded-t bg-cover flex justify-start items-center">
         <SmallProfileCard
@@ -65,6 +72,10 @@ const Doctors = ({
           handleToggleShow4={handleToggleShow4}
           show4={show4}
           id={id}
+          Max={Max}
+          isDark={isDark}
+          currentDate={currentDate}
+
         />
       </div>
     </div>

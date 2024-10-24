@@ -1,9 +1,10 @@
 import React from "react";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
 import { IoArrowBackCircle } from "react-icons/io5";
-import BookApointment from "../Patient/BookApintment/BookApointment.patient";
 import BookeAppointManually from "../Patient/BookApintment/BookeAppointManually";
 import { FaUserDoctor } from "react-icons/fa6";
+import { BookAppointMent } from "../../Redux/slices/Patient.Redux";
+import { useAppDispatch } from "../../Redux/Store/Store";
 interface data {
   name?: string;
   role?: string;
@@ -21,6 +22,10 @@ interface data {
   show4?: boolean;
   id?: any;
   key?: any;
+  Max?: number;
+  isDark?: boolean;
+  currentDate?: string;
+  BookAppointment?: (id: string) => void;
 }
 const DoctroPageModel = (props: data) => {
   const {
@@ -39,12 +44,25 @@ const DoctroPageModel = (props: data) => {
     show4,
     id,
     availability,
+    Max,
+    isDark,
+    currentDate,
+    BookAppointment,
   } = props;
-  globalResizeFunction();
+  const max_patient_check = availability?.filter((index) => {
+    return index?.day === currentDate;
+  });
 
+  const dispatch = useAppDispatch();
+
+  globalResizeFunction();
   return (
     <div className="fixed inset-0 flex items-center justify-evenly bg-black bg-opacity-80 ">
-      <div className="bg-primaryGrey p-8 rounded-[2rem] shadow-lg w-full max-w-[70%] h-[60vh] flex justify-between laptop:w-[50%] relative">
+      <div
+        className={`${
+          isDark ? "bg-gray-800" : "bg-white"
+        } p-8 rounded-[2rem] shadow-lg w-full max-w-[70%] h-[60vh] flex justify-between laptop:w-[50%] relative `}
+      >
         <div className="flex justify-evenly flex-col items-start w-[45%]  h-[50vh] ">
           <div className="flex justify-center w-full items-center h-[20vh] ">
             <div className=" border-2 w-[50%] h-[16vh] rounded-[7rem] flex justify-center items-center shadow-2xl]">
@@ -68,39 +86,58 @@ const DoctroPageModel = (props: data) => {
           </div>
         </div>
 
-        <div className="flex flex-col justify-around py-3  w-[45%] h-[50vh] ">
+        <div
+          className={`flex flex-col justify-around py-3  w-[45%] h-[50vh] ${
+            isDark ? "text-white" : "text-black"
+          }`}
+        >
           <div className="flex h-[20vh] justify-center items-center shadow-lg w-full rounded-[3rem] border-2">
-            <p className="text-primaryBlack text-4xl font-medium">NUMBER</p>
+            <p className=" text-4xl font-medium">
+              {max_patient_check[0]?.laterNumber?.number}
+            </p>
           </div>
 
-          <div className=" flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
-            <div className="flex w-full justify-around">
-              <div className="bg-primaryGrey w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">
-                <p className="text-primaryBlack text-xl font-bold">NEXT</p>
-              </div>
-              <div className="bg-primaryRed w-[40%] h-[5vh] rounded-lg flex justify-center items-center">
-                <p className="text-white text-xl font-bold  ">FULL</p>
-              </div>
-            </div>
-
-            <div className="flex w-full justify-around">
-              <div className="bg-primaryGrey w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">
-                <p className="text-primaryBlack text-xl font-bold ">
-                  <BookApointment />
-                </p>
-              </div>
-
-              <div className="bg-primaryRed w-[40%] h-[5vh] rounded-lg flex justify-center items-center">
-                {!show4 ? (
-                  <button onClick={handleToggleShow4}>
-                    <FaUserDoctor size={30} />
-                  </button>
+          {availability?.length === 0 ? (
+            <div className=" flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
+              <div className={`flex w-full justify-around`}>
+                {max_patient_check?.length !== 0 &&
+                max_patient_check[0]?.laterNumber?.number === Max ? (
+                  <div
+                    className={`  w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2`}
+                  >
+                    <p className=" text-xl font-bold  ">FULL</p>
+                  </div>
                 ) : (
-                  <BookeAppointManually />
+                  <div className="border-2 rounded-2xl bg-red-400 w-[50%] h-[6vh] flex justify-center items-center">
+                    <p className=" text-xl font-bold text-center">
+                      Doctor not available
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
+              <div className="flex w-full justify-around">
+                <div
+                  className="w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2"
+                  onClick={() => dispatch(BookAppointMent(id))} // Correct dispatch with id as argument
+                >
+                  <p className=" text-xl font-bold ">Next</p>
+                </div>
+
+                <div className=" w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">
+                  {!show4 ? (
+                    <button onClick={handleToggleShow4}>
+                      <FaUserDoctor size={30} />
+                    </button>
+                  ) : (
+                    <BookeAppointManually />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="absolute bottom-4 right-4">

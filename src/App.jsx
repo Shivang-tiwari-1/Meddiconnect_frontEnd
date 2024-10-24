@@ -16,8 +16,15 @@ import FindDoctor from "./Component/Patient/Finddoctors/FindDocotr";
 import Alert from "./Component/UtilityComponents/Alert.Utility";
 import Home from "./Component/Home/Home";
 import Notification from "./Component/Notofication/Notification";
-
+import { useEffect } from "react";
+import { socket } from "../src/Constants/index";
+import BookApointment from "./Component/Patient/BookApintment/BookApointment.patient";
 function App() {
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("connected to the server");
+    });
+  }, []);
   const location = useLocation();
 
   return (
@@ -40,6 +47,10 @@ function App() {
             <Route path="/account" element={<Patient />} />
             <Route path="/Notification" element={<Notification />} />
             <Route path="/chat" element={<FinalChatroom />} />
+            <Route
+              path="/BookAppointmentManually"
+              element={<BookApointment />}
+            />
           </Route>
         </Route>
       </Routes>

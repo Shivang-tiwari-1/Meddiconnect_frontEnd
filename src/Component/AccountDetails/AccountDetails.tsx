@@ -12,18 +12,19 @@ import {
 import PageModel from "../../Utility/PageModel.Utils";
 import { getDoctorData } from "../../Redux/slices/Doctor.Redux";
 import PageModel2 from "../../Utility/PageModel/PageModel2.Utils";
-
+import { logout } from "../../Redux/slices/signup_login.";
 const Patient = () => {
   //****************************APPSELECTOR*******************************//
   const { patientData, show, Appointmenthistory, show2, show3, show4 } =
     useAppSelector((state) => state.patient);
   const { role } = useAppSelector((state) => state.states);
   const { doctordata } = useAppSelector((state) => state.doctor);
-
+  const { isDark } = useAppSelector((state) => state?.stateChange);
   //*************************** DISPATCH**********************************//
   const dispatch = useAppDispatch();
 
   //**************************HANDLEFUNCTION*****************************//
+
   useEffect(() => {
     if (role === "patient") {
       dispatch(getUserData());
@@ -33,7 +34,7 @@ const Patient = () => {
   }, [dispatch]);
 
   const handleToggleShow = () => {
-    dispatch(toogleShow());
+    dispatch(toogleShow2());
   };
 
   const handleToggleShow4 = () => {
@@ -51,6 +52,9 @@ const Patient = () => {
   const handleHistory = () => {
     dispatch(history());
     dispatch(toogleShow2());
+  };
+  const handleLogout = () => {
+    dispatch(logout());
   };
 
   console.log("show", show, "show2", show2, "show3", show3, "show4", show4);
@@ -71,7 +75,11 @@ const Patient = () => {
 
   //*******************************HTMLFILE*********************************//
   return (
-    <div className="flex justify-center items-center w-full h-[85vh]">
+    <div
+      className={`flex justify-center items-center w-full h-[85vh]  ${
+        isDark ? "bg-bgColorDarkBlack" : "bg-white"
+      } ${isDark ? "text-textWhite" : "text-black"}`}
+    >
       <div className=" border-2  w-[70%] desktop:w-[40%] h-[80vh] shadow-2xl rounded-2xl flex justify-center pl-3 ">
         <div className="flex justify-center  flex-col font-[300px] gap-4 w-[60%]">
           <div className="border-2 rounded-md w-[60] h-11 flex items-center shadow-lg">
@@ -87,6 +95,7 @@ const Patient = () => {
 
           {show3 ? (
             <PageModel
+              isDark={isDark}
               address={data?.address}
               handleToggleShow3={handleToggleShow3}
             />
@@ -168,6 +177,23 @@ const Patient = () => {
               <div className="flex-grow flex items-center justify-center ">
                 <p>{data?.role}</p>
               </div>
+            </div>
+          </div>
+
+          <div className="flex justify-around">
+            <div
+              className="w-[30%] h-[5vh] border-2  rounded-md flex justify-center items-center bg-red-400"
+              onClick={handleLogout}
+            >
+              <button className=" text-lg ">logout</button>
+            </div>
+
+            <div className="w-[30%] h-[5vh] border-2  rounded-md flex justify-center items-center bg-green-500">
+              <button className=" text-md ">forgot password</button>
+            </div>
+
+            <div className="w-[30%] h-[5vh] border-2  rounded-md flex justify-center items-center  bg-red-400">
+              <button className=" text-md ">Delete Account</button>
             </div>
           </div>
         </div>

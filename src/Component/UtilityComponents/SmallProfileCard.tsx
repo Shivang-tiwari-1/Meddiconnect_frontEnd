@@ -26,6 +26,9 @@ interface data {
   data?: object[];
   id?: any;
   doctor?: object[];
+  Max?: number;
+  currentDate?: string;
+  BookAppointment?: () => void;
 }
 
 const SmallProfileCard = (props: data) => {
@@ -47,6 +50,9 @@ const SmallProfileCard = (props: data) => {
     isDark,
     id,
     doctor,
+    Max,
+    currentDate,
+    BookAppointment
   } = props;
 
   globalResizeFunction();
@@ -71,6 +77,10 @@ const SmallProfileCard = (props: data) => {
             show4={show4}
             handleToggleShow4={handleToggleShow4}
             id={id}
+            Max={Max}
+            isDark={isDark}
+            currentDate={currentDate}
+            BookAppointment={BookAppointment}
           />
         </div>
       ) : (
@@ -80,7 +90,7 @@ const SmallProfileCard = (props: data) => {
           }`}
           onClick={handleToggleShow}
         >
-          <div className={`flex justify-start dark:bg-primaryGrey gap-5`}>
+          <div className={`flex justify-start dark:bg-bgColorDarkBlack gap-5`}>
             <div className="px-2 w-[80px] h-[70px] ">
               <img
                 src={`http://localhost:5000/images/${profileImage}`}
