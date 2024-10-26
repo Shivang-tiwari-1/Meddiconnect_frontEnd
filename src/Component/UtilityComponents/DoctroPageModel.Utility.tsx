@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState } from "react";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
 import { IoArrowBackCircle } from "react-icons/io5";
 import BookeAppointManually from "../Patient/BookApintment/BookeAppointManually";
 import { FaUserDoctor } from "react-icons/fa6";
 import { BookAppointMent } from "../../Redux/slices/Patient.Redux";
 import { useAppDispatch } from "../../Redux/Store/Store";
+import { BsCalendar2DateFill } from "react-icons/bs";
+
 interface data {
   name?: string;
   role?: string;
@@ -49,10 +51,19 @@ const DoctroPageModel = (props: data) => {
     currentDate,
     BookAppointment,
   } = props;
+  const [click, SetClick] = useState(false);
+  const [rotated, setRotated] = useState(false);
+  const [change, StateChange] = useState(" ");
+
   const max_patient_check = availability?.filter((index) => {
     return index?.day === currentDate;
   });
 
+  const check_day = availability?.filter((index) => {
+    return index?.day === change;
+  });
+
+  console.log(check_day);
   const dispatch = useAppDispatch();
 
   globalResizeFunction();
@@ -85,19 +96,57 @@ const DoctroPageModel = (props: data) => {
             </div>
           </div>
         </div>
-
+        <div className="flex">
+          {!click ? (
+            <button
+              onClick={() => SetClick(true)}
+              className="transition-transform transform hover:scale-110"
+            >
+              <BsCalendar2DateFill size={30} />
+            </button>
+          ) : (
+            <div className="transition-all duration-500 ease-in-out flex justify-center items-center">
+              <div className=" absolute border-2 w-[30%] h-[20vh] rounded-3xl bg-slate-300 opacity-90">
+                {availability?.map((item, idx) => (
+                  <button
+                    key={idx}
+                    value={item.day} // Assuming you want to use the day as the value
+                    className="flex justify-center items-center w-full h-[3vh] my-[1.5px] transition-transform duration-300 ease-in-out transform hover:scale-105 hover:border-t-2 hover:border-b-2 rounded-2xl bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold shadow-md hover:shadow-lg"
+                    onClick={(e) => StateChange(e.target.value)}
+                  >
+                    {item.day}
+                  </button>
+                ))}
+                <button
+                  className="flex justify-center"
+                  onClick={() => SetClick(false)}
+                >
+                  back
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
         <div
           className={`flex flex-col justify-around py-3  w-[45%] h-[50vh] ${
             isDark ? "text-white" : "text-black"
           }`}
         >
-          <div className="flex h-[20vh] justify-center items-center shadow-lg w-full rounded-[3rem] border-2">
-            <p className=" text-4xl font-medium">
-              {max_patient_check[0]?.laterNumber?.number}
-            </p>
-          </div>
+          {check_day?.length === 0 ? (
+            <div className="flex h-[20vh] justify-center items-center shadow-lg w-full rounded-[3rem] border-2">
+              <p className=" text-4xl font-medium">
+                {max_patient_check[0]?.laterNumber?.number}
+              </p>
+            </div>
+          ) : (
+            <div className="flex h-[20vh] justify-center items-center shadow-lg w-full rounded-[3rem] border-2">
+              <p className=" text-4xl font-medium">{check_day[0]?.day}</p>
+            </div>
+          )}
 
-          {availability?.length === 0 ? (
+          {availability?.length === 0 ||
+          max_patient_check?.length === 0 ||
+          max_patient_check?.day !== currentDate ? (
             <div className=" flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
               <div className={`flex w-full justify-around`}>
                 {max_patient_check?.length !== 0 &&
@@ -118,12 +167,12 @@ const DoctroPageModel = (props: data) => {
             </div>
           ) : (
             <div className="flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
-              <div className="flex w-full justify-around">
+              <div className="flex w-full justify-around ">
                 <div
-                  className="w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2"
-                  onClick={() => dispatch(BookAppointMent(id))} // Correct dispatch with id as argument
+                  className="w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2  transition-all duration-300 ease-in-out transform hover:scale-105 hover:bg-green-400 shadow hover:shadow-lg cursor-pointer"
+                  onClick={() => dispatch(BookAppointMent(id))}
                 >
-                  <p className=" text-xl font-bold ">Next</p>
+                  <p className="text-xl font-bold text-white">Next</p>
                 </div>
 
                 <div className=" w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">

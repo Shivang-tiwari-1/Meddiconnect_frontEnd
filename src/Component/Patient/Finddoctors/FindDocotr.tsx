@@ -15,6 +15,7 @@ import {
 } from "../../../Redux/slices/Patient.Redux";
 import Doctors from "./Doctors";
 import { globalResizeFunction } from "../../../Utility/resizer.Utils";
+import { FixedSizeList as List } from "react-window";
 
 const FindDoctor = () => {
   const [selectedState, setSelectedState] = useState<string[]>([]);
@@ -56,7 +57,7 @@ const FindDoctor = () => {
       prevCriteria.filter((item) => item !== currentState)
     );
   };
-console.log(doctors)
+  console.log(doctors);
   const data = {
     locality: [
       "Downtown",
@@ -92,6 +93,30 @@ console.log(doctors)
     text2: "speacilist",
     text3: "nearby",
   };
+
+  const renderDoctor = ({ index, style }) => {
+    const doctor = doctors[index];
+    return (
+      <Doctors
+        name={doctor?.name}
+        availability={doctor?.availability}
+        profileImage={doctor?.profileImage}
+        address={doctor?.address}
+        history={doctor?.history}
+        role={doctor?.role}
+        show={show}
+        tabletBool={tabletBool}
+        handleToggleShow={handleToggleShow}
+        mobileBool={mobileBool}
+        isDark={isDark}
+        id={doctor?._id}
+        openDoctorId={openDoctorId}
+        Max={doctor?.Max}
+        BookAppointment={BookAppointMent}
+      />
+    );
+  };
+
   return (
     <div className={`flex  ${isDark ? "dark" : ""}`}>
       <div className="dark:bg-bgColorDarkBlack  bg:text-textWhite">
@@ -193,7 +218,7 @@ console.log(doctors)
             </div>
           ) : (
             <div
-              className={`grid-cols desktop:grid-cols-3 mobile:grid-rows-1 grid gap-4 py-4 px-4  `}
+              className={`grid-row desktop:grid-cols-3 mobile:grid-rows-1 grid gap-4 py-4 px-4  `}
             >
               {doctors.map((doctor) => (
                 <Doctors

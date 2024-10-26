@@ -52,7 +52,7 @@ const SmallProfileCard = (props: data) => {
     doctor,
     Max,
     currentDate,
-    BookAppointment
+    BookAppointment,
   } = props;
 
   globalResizeFunction();
@@ -109,7 +109,7 @@ const SmallProfileCard = (props: data) => {
             </div>
           </div>
           <div className={`w-[4rem] `}>
-            {availability?.length === 0 ? (
+            {availability?.length === 0 || availability?.day !== currentDate ? (
               <p className="border-2 rounded-lg bg-primaryRed opacity-70 font-[500] z-20">
                 InActive
               </p>
