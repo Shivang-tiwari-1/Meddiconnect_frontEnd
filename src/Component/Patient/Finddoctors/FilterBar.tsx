@@ -4,9 +4,6 @@ import React from "react";
 const data = ["Apple", "Banana", "Orange", "Mango", "Pineapple", "Grapes"];
 
 interface IData {
-  locality?: string[];
-  speacilist?: string[];
-  nearby?: string[];
   selectedStates?: string[];
   text1: string;
   text2: string;
@@ -14,27 +11,27 @@ interface IData {
   onSelectState?: (currentState: string) => void;
   onDeselectstate?: (currentState: string) => void;
   show?: boolean;
-  tabletBool?: boolean;
   mobileBool?: boolean;
   isDark?: boolean;
+  doctor?: string[];
+  specializedIn?: object[];
+  addresss?: string[];
 }
 
 const FilterBar = (props: IData) => {
   const {
-    locality = [],
-    speacilist = [],
-    nearby = [],
     selectedStates = [],
     onSelectState,
     onDeselectstate,
     text1,
     text2,
     text3,
-    tabletBool,
+    doctor,
+    specializedIn,
+    addresss,
   } = props;
 
-  const handleCheckboxChange =
-    (currentState: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCheckboxChange = (currentState: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
       const isChecked = event.target.checked;
 
       if (isChecked) {
@@ -49,7 +46,7 @@ const FilterBar = (props: IData) => {
     };
 
   return (
-    <div className="desktop:w-[15vw] phone:w-[15vw] px-[1rem] dark:bg-lightBlack dark:text-textWhite">
+    <div className="desktop:w-[15vw] phone:w-[15vw] px-[1rem] dark:bg-lightBlack dark:text-textWhite h-[85vh]">
       <div className="flex flex-col font-[600] text-[18px] border-b py-4">
         Filter By
       </div>
@@ -57,7 +54,7 @@ const FilterBar = (props: IData) => {
       <div className="pt-4">
         <div className="font-[600] text-[14px]">{text1}</div>
         <div className="py-2 border-b">
-          {locality.map((item) => (
+          {addresss?.map((item) => (
             <div key={item} className="flex gap-2">
               <input
                 type="checkbox"
@@ -74,8 +71,8 @@ const FilterBar = (props: IData) => {
       <div className="pt-4">
         <div className="font-[600] text-[14px]">{text2}</div>
         <div className="py-2 border-b">
-          {speacilist.map((item) => (
-            <div key={item} className="flex gap-2">
+          {specializedIn?.map((item, index) => (
+            <div key={index} className="flex gap-2">
               <input
                 type="checkbox"
                 className="cursor-pointer"
@@ -91,8 +88,8 @@ const FilterBar = (props: IData) => {
       <div className="py-4">
         <div className="font-[600] text-[14px]">{text3}</div>
         <div className="py-2 border-b">
-          {nearby.map((item) => (
-            <div key={item} className="flex gap-2 items-center">
+          {doctor?.map((item, index) => (
+            <div key={index} className="flex gap-2 items-center">
               <input
                 type="checkbox"
                 className="cursor-pointer"

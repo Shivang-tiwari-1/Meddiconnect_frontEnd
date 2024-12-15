@@ -4,11 +4,16 @@ import { useAppDispatch, useAppSelector } from "../Redux/Store/Store";
 import axios from "axios";
 
 const useJwtInterceptors = () => {
-  const { accessToken, refreshToken } = useAppSelector(
-    (state) => state?.states
-  );
+  const {
+    pat_accessToken,
+    pat_refreshToken,
+    doc_accessToken,
+    doc_refreshToken,
+    role,
+  } = useAppSelector((state) => state?.states);
   const dispatch = useAppDispatch();
-
+  const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
+  const refreshToken = role === "patient" ? pat_refreshToken : doc_refreshToken;
   axiosPrivate?.interceptors?.request?.use(async (config) => {
     if (!config?.headers?.Authorization && accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;

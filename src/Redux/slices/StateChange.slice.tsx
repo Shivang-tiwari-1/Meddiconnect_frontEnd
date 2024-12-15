@@ -6,15 +6,15 @@ interface change {
   gridView?: boolean;
   isTablet?: boolean;
   isDark?: boolean;
+
 }
 const initialState: change = {
   isMobile: false,
   gridView: false,
   isTablet: false,
   isDark: false,
+
 };
-
-
 
 const StateChange = createSlice({
   name: "Change",
@@ -31,6 +31,9 @@ const StateChange = createSlice({
     },
     toogleDarkMode: (state) => {
       state.isDark = !state.isDark;
+    },
+    setCurrentSteps: (state) => {
+
     },
   },
 });

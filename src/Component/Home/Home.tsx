@@ -2,18 +2,17 @@ import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import { GetNotification } from "../../Redux/slices/Notification.Redux";
 import { socket } from "../../Constants";
+import {
+  receivedmessage,
+  sendDataSocket,
+} from "../../Sockets/Initialize_socket";
 
 const Home = () => {
-  const { accessToken } = useAppSelector((state) => state.states);
+  const { doc_accessToken, pat_accessToken, userData } = useAppSelector(
+    (state) => state.states
+  );
   const { isDark } = useAppSelector((state) => state.stateChange);
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    if (accessToken) {
-      dispatch(GetNotification());
-   
-    }
-  }, [dispatch, accessToken]);
 
   return (
     <div

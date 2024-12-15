@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  setCredentials,
   setHoverField,
   toggleShowPassword,
   toogleCongirmPassword,
@@ -11,36 +12,49 @@ import { signup } from "../../Redux/slices/signup_login.";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import Button from "../UtilityComponents/Button";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
-  const [credentials, setCredentials] = useState({
-    name: "",
-    email: "",
-    password: "",
-    profileImage: null,
-    address: "",
-    role: "",
-    phone: "",
-  });
+  const navigate = useNavigate();
 
-  const { showPassword, termsAccepted, confirmPassword, mobile, hoveredField } =
-    useAppSelector((state) => state.states);
+  //**************************APPSELECTOR****************/
+  const {
+    showPassword,
+    termsAccepted,
+    confirmPassword,
+    credentials,
+    mobile,
+    hoveredField,
+  } = useAppSelector((state) => state.states);
+
+  const { isDark } = useAppSelector((state) => state.stateChange);
+
+  //*************************DISPATCH********************/
   const dispatch = useAppDispatch();
 
+  //***************************HANDLEFUNCTION**************/
   globalResizeFunction();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const [profileImage, setProfileImage] = useState<File | null>(null);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, type, value, files } = e.target;
     if (type === "file" && files) {
-      setCredentials({ ...credentials, [name]: files[0] });
-    } else setCredentials({ ...credentials, [name]: value });
+      setProfileImage(files[0]);
+    } else {
+      dispatch(
+        setCredentials({ field: name as keyof typeof credentials, value })
+      );
+    }
   };
 
-  const handleRoleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleRolegenderChange = (e: any) => {
     const { value } = e.target;
-    setCredentials({ ...credentials, role: value });
+    if (value === "doctor" || value === "patient") {
+      dispatch(setCredentials({ field: "role", value }));
+    } else {
+      dispatch(setCredentials({ field: "gender", value }));
+    }
     dispatch(tooglePatientCheck(value));
   };
 
@@ -48,15 +62,13 @@ const SignUp = () => {
     dispatch(toogleTermAcdepted());
   };
 
-  const handleConfirmPasswordState = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleConfirmPasswordState = (e: any) => {
     dispatch(toogleCongirmPassword(e.target.value));
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (confirmPassword !== credentials.password) {
+    if (confirmPassword !== credentials?.password) {
       alert("Confirm password does not match");
       return;
     }
@@ -64,27 +76,67 @@ const SignUp = () => {
       alert("You must accept the terms and conditions");
       return;
     }
+
     const formData = new FormData();
-    Object.keys(credentials).forEach((key) => {
-      if (credentials[key] !== null) {
-        formData.append(key, credentials[key]);
+    Object.entries(credentials).forEach(([key, value]) => {
+      if (value) formData.append(key, value as string);
+    });
+
+    if (profileImage) formData.append("profileImage", profileImage);
+
+    dispatch(signup(formData)).then((action) => {
+      if (action.type === "user/signup/fulfilled") {
+        navigate("/login", { replace: true });
       }
     });
-    dispatch(signup(formData));
-    setCredentials({
-      name: "",
-      email: "",
-      password: "",
-      profileImage: null,
-      address: "",
-      role: "",
-      phone: "",
-    });
+
+    dispatch(
+      setCredentials({
+        field: "email",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "password",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "role",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "phone",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "address",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "profileImage",
+        value: "",
+      })
+    );
+    dispatch(
+      setCredentials({
+        field: "name",
+        value: "",
+      })
+    );
+    dispatch(toogleCongirmPassword(""));
   };
 
-  const handleMouseOver = (fieldName: string) => {
-    console.log(`Mouse over: ${fieldName}`);
-    dispatch(setHoverField(fieldName));
+  const handleMouseOver = (fieldNam: string) => {
+    dispatch(setHoverField(fieldNam));
   };
 
   const handleMouseOut = () => {
@@ -95,18 +147,20 @@ const SignUp = () => {
     <div
       className={`flex w-[100%] h-[${
         mobile ? "100vh" : "85vh"
-      }] justify-center items-center bg-textWhite dark:bg-lightBlack`}
+      }] justify-center items-center ${isDark ? "bg-lightBlack" : "bg-white"}`}
     >
-      <div className="flex flex-col justify-center items-center mt-[2rem] dark:border-textWhite pb-[9rem] desktop:w-[40%] tablet:w-[90%]">
+      <div
+        className={`flex flex-col justify-center items-center mt-[2rem]  pb-[9rem] desktop:w-[40%] tablet:w-[90%]  `}
+      >
         <div className="w-full flex flex-col justify-center items-center">
           <div className="flex w-[80%] flex-col justify-center items-center h-[60vh] border-2 rounded-2xl shadow-2xl">
             <form onSubmit={handleSubmit}>
               <div className="flex flex-row pb-5 gap-[1rem] ">
-                <div className="w-1/2 relative ">
+                <div className="w-1/2 relative font-[500]">
                   <select
                     name="role"
-                    value={credentials.role}
-                    onChange={handleRoleChange}
+                    value={credentials?.role}
+                    onChange={handleRolegenderChange}
                     onMouseOver={() => handleMouseOver("role")}
                     onMouseOut={handleMouseOut}
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full placeholder-gray-500 outline-none shadow-lg"
@@ -121,15 +175,38 @@ const SignUp = () => {
                     </div>
                   )}
                 </div>
+                <div className="relative w-1/2 font-[500]">
+                  <select
+                    name="gender"
+                    value={credentials?.gender}
+                    onChange={handleRolegenderChange}
+                    onMouseOver={() => handleMouseOver("gender")}
+                    onMouseOut={handleMouseOut}
+                    className="border border-primaryGrey rounded-lg h-10 w-full placeholder-gray-500 outline-none shadow-lg"
+                  >
+                    <option value=""> gender</option>
+                    <option value="Male">Male</option>
+                    <option value="female">Femlae</option>
+                    <option value="other">other</option>
+                  </select>
 
-                <div className="w-1/2 relative">
+                  {hoveredField === "gender" && (
+                    <div className="absolute left-0 top-[-40px] p-2 bg-gray-200 text-black text-sm rounded-md shadow-lg z-50">
+                      Select your gender
+                    </div>
+                  )}
+                </div>
+                <div className={`w-1/2 relative`}>
                   <input
                     type="file"
                     name="profileImage"
                     id="profileImage"
+                    accept="image/*"
                     onMouseOver={() => handleMouseOver("profileImage")}
                     onMouseOut={handleMouseOut}
-                    className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full placeholder-gray-500 outline-none shadow-lg"
+                    className={`border border-primaryGrey rounded-[10px] h-[2.5rem] w-full placeholder-gray-500 outline-none shadow-lg ${
+                      isDark ? "bg-white" : ""
+                    }`}
                     onChange={handleInputChange}
                   />
                   {hoveredField === "profileImage" && (
@@ -145,10 +222,11 @@ const SignUp = () => {
                   <input
                     type="text"
                     placeholder="Name"
-                    value={credentials.name}
+                    value={credentials?.name}
                     name="name"
                     id="name"
-                    className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg"
+                    className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg font-[500
+                    ]"
                     onChange={handleInputChange}
                     onMouseOver={() => handleMouseOver("Name")}
                     onMouseOut={handleMouseOut}
@@ -163,7 +241,7 @@ const SignUp = () => {
                   <input
                     type="text"
                     placeholder="Email"
-                    value={credentials.email}
+                    value={credentials?.email}
                     name="email"
                     id="email"
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg"
@@ -183,7 +261,7 @@ const SignUp = () => {
                 <input
                   type="text"
                   name="address"
-                  value={credentials.address}
+                  value={credentials?.address}
                   id="address"
                   placeholder="Address"
                   className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
@@ -203,7 +281,7 @@ const SignUp = () => {
                   <input
                     type={showPassword ? "text" : "password"}
                     name="password"
-                    value={credentials.password}
+                    value={credentials?.password}
                     id="password"
                     placeholder="Password"
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
@@ -222,7 +300,7 @@ const SignUp = () => {
                       className="focus:outline-none"
                       onClick={() => dispatch(toggleShowPassword())}
                     >
-                      {credentials.password.length === 0
+                      {credentials?.password?.length === 0
                         ? " "
                         : showPassword
                         ? "Hide"
@@ -236,7 +314,7 @@ const SignUp = () => {
                 <input
                   type="tel"
                   name="phone"
-                  value={credentials.phone}
+                  value={credentials?.phone}
                   id="phone"
                   placeholder="Phone"
                   className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
@@ -270,27 +348,38 @@ const SignUp = () => {
                 )}
               </div>
 
-              <div className="flex space-x-2 justify-center">
+              <div
+                className={` ${
+                  isDark ? "text-white" : ""
+                } flex space-x-2 justify-center font-[500]  `}
+              >
                 <label className="space-x-2">
                   <input
                     type="checkbox"
-                    className="form-checkbox"
+                    className="form-checkbox cursor-pointer"
                     checked={termsAccepted}
                     onChange={handleCheckboxChange}
                   />
-                  <span className="text-sm dark:text-textWhite">
+                  <span className=" ">
                     I agree to all{" "}
-                    <a href="#" className="text-primaryBlue">
+                    <a
+                      href="#"
+                      className="underline text-primaryBlue cursor-pointer"
+                    >
                       terms & conditions
                     </a>
                   </span>
                 </label>
               </div>
 
-              <div className="flex justify-center items-center flex-col">
-                <div className="font-[500] cursor-pointer dark:text-textWhite pt-8">
+              <div
+                className={`flex justify-center items-center flex-col ${
+                  isDark ? "text-white" : ""
+                } `}
+              >
+                <div className={`font-[500] cursor-pointer  pt-8`}>
                   Already have an account?{" "}
-                  <a href="#" className="text-primaryBlue">
+                  <a href="#" className="text-primaryBlue underline">
                     Login
                   </a>
                 </div>

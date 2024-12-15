@@ -16,41 +16,34 @@ import FindDoctor from "./Component/Patient/Finddoctors/FindDocotr";
 import Alert from "./Component/UtilityComponents/Alert.Utility";
 import Home from "./Component/Home/Home";
 import Notification from "./Component/Notofication/Notification";
-import { useEffect } from "react";
-import { socket } from "../src/Constants/index";
-import BookApointment from "./Component/Patient/BookApintment/BookApointment.patient";
+import Prescripemedicine from "./Component/Doctor/Prescripemedicine";
+import DocHome from "./Component/Doctor/DocHome";
+import Notify from "./Component/UtilityComponents/Notify";
 function App() {
-  useEffect(() => {
-    socket.on("connect", () => {
-      console.log("connected to the server");
-    });
-  }, []);
   const location = useLocation();
 
   return (
     <>
       {location.pathname !== "" && <Navbar />}
       <Alert />
+      <Notify />
       <Routes>
         <Route path="/" element={<Layout />}>
-          {/*********  public routes************ */}
+          {/* Public Routes */}
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
-          {/*************doctor route************/}
-          <Route
-            element={<RequiredAuthPatinet allowedRoles={["doctor"]} />}
-          ></Route>
-          {/******patient route*******************/}
+          <Route path="/account" element={<Patient />} />
+          <Route path="/Notification" element={<Notification />} />
+          {/* Doctor Routes */}
+          <Route element={<RequiredAuthPatinet allowedRoles={["doctor"]} />}>
+            <Route path="/DocHome" element={<DocHome />} />
+            <Route path="/prescripe" element={<Prescripemedicine />} />
+          </Route>
+
+          {/* Patient Routes */}
           <Route element={<RequiredAuthPatinet allowedRoles={["patient"]} />}>
             <Route path="/findDoctor" element={<FindDoctor />} />
-            <Route path="/account" element={<Patient />} />
-            <Route path="/Notification" element={<Notification />} />
-            <Route path="/chat" element={<FinalChatroom />} />
-            <Route
-              path="/BookAppointmentManually"
-              element={<BookApointment />}
-            />
           </Route>
         </Route>
       </Routes>

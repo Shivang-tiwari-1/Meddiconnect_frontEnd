@@ -1,5 +1,6 @@
 import React from "react";
 import SmallProfileCard from "../../UtilityComponents/SmallProfileCard";
+
 interface doctros {
   key?: string;
   name?: string;
@@ -8,6 +9,7 @@ interface doctros {
   role?: string;
   show?: boolean;
   tabletBool?: boolean;
+  specializedIn?: string[];
   handleToggleShow: (id: string | null) => void;
   address?: string;
   history?: [];
@@ -22,6 +24,15 @@ interface doctros {
   openDoctorId: string | null;
   Max?: number;
   BookAppointment?: () => void;
+  globalResizeFunction?: () => void;
+  handleMouseOver?: (feildname: string) => void;
+  handleMouseOut?: () => void;
+  hoveredField?: string;
+  isActive?: boolean;
+  disable?: boolean;
+  isDisabled?: (id: any) => void;
+  handleToggleShow2?: () => void;
+  timings?: any;
 }
 
 const Doctors = ({
@@ -29,7 +40,6 @@ const Doctors = ({
   role,
   profileImage,
   availability,
-  show,
   handleToggleShow,
   tabletBool,
   address,
@@ -43,6 +53,14 @@ const Doctors = ({
   id,
   openDoctorId,
   Max,
+  globalResizeFunction,
+  handleMouseOut,
+  handleMouseOver,
+  hoveredField,
+  isActive,
+  specializedIn,
+  handleToggleShow2,
+  timings,
 }: doctros) => {
   const isOpen = openDoctorId === id;
   const now = new Date();
@@ -53,7 +71,7 @@ const Doctors = ({
     <div
       className={`border rounded-[50px] w-[100%] bg-white opacity-9 shadow-2xl ${
         isDark ? "dark" : ""
-      }  dark:bg-bgColorDarkBlack  `}
+      }  dark:bg-bgColorDarkBlack   `}
     >
       <div className="w-full tablet:w-full tablet:h-[100px] rounded-t bg-cover flex justify-start items-center">
         <SmallProfileCard
@@ -75,7 +93,14 @@ const Doctors = ({
           Max={Max}
           isDark={isDark}
           currentDate={currentDate}
-
+          globalResizeFunction={globalResizeFunction}
+          handleMouseOut={handleMouseOut}
+          handleMouseOver={handleMouseOver}
+          hoveredField={hoveredField}
+          isActive={isActive}
+          specializedIn={specializedIn}
+          handleToggleShow2={handleToggleShow2}
+          timings={timings}
         />
       </div>
     </div>

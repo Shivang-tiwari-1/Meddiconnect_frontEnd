@@ -8,6 +8,7 @@ import { globalResizeFunction } from "../../Utility/resizer.Utils";
 interface data {
   name?: string;
   role?: string;
+  specializedIn?: string[];
   profileImage?: string;
   availability?: [];
   show?: boolean;
@@ -29,6 +30,12 @@ interface data {
   Max?: number;
   currentDate?: string;
   BookAppointment?: () => void;
+  globalResizeFunction?: () => void;
+  handleMouseOut?: () => void;
+  handleMouseOver?: (fieldName: string) => void;
+  timings?: any;
+  hoveredField?: string;
+  isActive?: boolean;
 }
 
 const SmallProfileCard = (props: data) => {
@@ -53,6 +60,12 @@ const SmallProfileCard = (props: data) => {
     Max,
     currentDate,
     BookAppointment,
+    handleMouseOut,
+    handleMouseOver,
+    hoveredField,
+    isActive,
+    specializedIn,
+    timings,
   } = props;
 
   globalResizeFunction();
@@ -81,19 +94,27 @@ const SmallProfileCard = (props: data) => {
             isDark={isDark}
             currentDate={currentDate}
             BookAppointment={BookAppointment}
+            globalResizeFunction={globalResizeFunction}
+            handleMouseOut={handleMouseOut}
+            handleMouseOver={handleMouseOver}
+            hoveredField={hoveredField}
+            specializedIn={specializedIn}
+            timings={timings}
           />
         </div>
       ) : (
         <button
-          className={`flex items-center flex-row justify-around w-full ${
+          className={`flex items-center flex-row justify-around w-full  ${
             isDark ? "dark" : ""
-          }`}
+          }  ${
+            availability?.length === 0 ? "cursor-not-allowed opacity-50" : ""
+          } `}
           onClick={handleToggleShow}
         >
           <div className={`flex justify-start dark:bg-bgColorDarkBlack gap-5`}>
             <div className="px-2 w-[80px] h-[70px] ">
               <img
-                src={`http://localhost:5000/images/${profileImage}`}
+                src={profileImage}
                 alt="Profile"
                 className="w-full h-full object-contain rounded-full"
               />
@@ -108,16 +129,29 @@ const SmallProfileCard = (props: data) => {
               </div>
             </div>
           </div>
-          <div className={`w-[4rem] `}>
-            {availability?.length === 0 || availability?.day !== currentDate ? (
-              <p className="border-2 rounded-lg bg-primaryRed opacity-70 font-[500] z-20">
-                InActive
-              </p>
+
+          <div
+            className={`w-[4rem] flex justify-center items-center flex-col gap-2`}
+          >
+            {!isActive ? (
+              <div className="border-2 w-3 h-3 rounded-full bg-primaryRed"></div>
             ) : (
-              <p className="border-2 rounded-lg bg-primaryGreen opacity-70 font-[500] z-20">
-                Active
-              </p>
+              <div className="border-2 w-3 h-3 rounded-full bg-primaryGreen"></div>
             )}
+            <div>
+              {availability?.length > 0 ? (
+                <div className="w-28">
+                  {" "}
+                  <p className="text-sm font-medium">Taking patients </p>
+                </div>
+              ) : (
+                <div className="w-28">
+                  <p className="text-sm text-primaryGrey font-semibold text-">
+                    Not Taking any patients
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </button>
       )}

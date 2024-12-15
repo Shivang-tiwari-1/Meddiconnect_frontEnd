@@ -10,22 +10,37 @@ import { CiUndo } from "react-icons/ci";
 import {
   BookAppointMent,
   fetchAllDoctors,
+  set_disable,
   setOpenDoctorId,
+  sideBarContent,
   toogleShow,
+  toogleShow2,
+  toogleShow4,
 } from "../../../Redux/slices/Patient.Redux";
 import Doctors from "./Doctors";
 import { globalResizeFunction } from "../../../Utility/resizer.Utils";
 import { FixedSizeList as List } from "react-window";
+import { setHoverField } from "../../../Redux/slices/signup_login.";
 
 const FindDoctor = () => {
   const [selectedState, setSelectedState] = useState<string[]>([]);
   const dispatch = useAppDispatch();
   //--------------------------------------------App-selectors---------------------------------//
 
-  const { tabletBool, mobileBool } = useAppSelector((state) => state.states);
-  const { show, show2, show3, show4, openDoctorId } = useAppSelector(
-    (state) => state.patient
+  const { tabletBool, mobileBool, hoveredField, timings } = useAppSelector(
+    (state) => state.states
   );
+  const {
+    show,
+    show4,
+    show2,
+    openDoctorId,
+    doctor,
+    specializedIn,
+    address,
+    numbersOfDoctors,
+    disable,
+  } = useAppSelector((state) => state.patient);
   const { isDark } = useAppSelector((state) => state.stateChange);
   const { gridView } = useAppSelector((state) => state.stateChange);
   const { doctors } = useAppSelector((state) => state.patient);
@@ -35,13 +50,21 @@ const FindDoctor = () => {
     if (openDoctorId === doctorId) {
       dispatch(setOpenDoctorId(null));
     } else {
-      dispatch(setOpenDoctorId(doctorId));
+      const fetch_doc = doctors?.find((index) => {
+        return index?._id === doctorId;
+      });
+
+      if (fetch_doc?.availability.length > 0) {
+        dispatch(setOpenDoctorId(doctorId));
+      }
     }
   };
-  globalResizeFunction();
-
+  const handleToggleShow4 = () => {
+    dispatch(toogleShow4());
+  };
   useEffect(() => {
     dispatch(fetchAllDoctors());
+    dispatch(sideBarContent());
   }, [dispatch]);
 
   const clearFilter = () => {
@@ -57,7 +80,15 @@ const FindDoctor = () => {
       prevCriteria.filter((item) => item !== currentState)
     );
   };
-  console.log(doctors);
+
+  const handleMouseOver = (fieldName: string) => {
+    dispatch(setHoverField(fieldName));
+  };
+
+  const handleMouseOut = () => {
+    dispatch(setHoverField(""));
+  };
+
   const data = {
     locality: [
       "Downtown",
@@ -94,36 +125,18 @@ const FindDoctor = () => {
     text3: "nearby",
   };
 
-  const renderDoctor = ({ index, style }) => {
-    const doctor = doctors[index];
-    return (
-      <Doctors
-        name={doctor?.name}
-        availability={doctor?.availability}
-        profileImage={doctor?.profileImage}
-        address={doctor?.address}
-        history={doctor?.history}
-        role={doctor?.role}
-        show={show}
-        tabletBool={tabletBool}
-        handleToggleShow={handleToggleShow}
-        mobileBool={mobileBool}
-        isDark={isDark}
-        id={doctor?._id}
-        openDoctorId={openDoctorId}
-        Max={doctor?.Max}
-        BookAppointment={BookAppointMent}
-      />
-    );
+  const isDisabled = (id: any) => {
+    dispatch(set_disable(id));
+  };
+
+  const handleToggleShow2 = () => {
+    dispatch(toogleShow2());
   };
 
   return (
-    <div className={`flex  ${isDark ? "dark" : ""}`}>
+    <div className={`flex  ${isDark ? "dark" : ""} h-[85vh]`}>
       <div className="dark:bg-bgColorDarkBlack  bg:text-textWhite">
         <FilterBar
-          locality={data?.locality}
-          speacilist={data?.speacilist}
-          nearby={data?.nearby}
           selectedStates={selectedState}
           onSelectState={handleSelectState}
           onDeselectstate={handleDeselct}
@@ -131,17 +144,20 @@ const FindDoctor = () => {
           text2={data?.text2}
           text3={data?.text3}
           show={show}
-          tabletBool={tabletBool}
           mobileBool={mobileBool}
           isDark={isDark}
+          doctor={doctor}
+          specializedIn={specializedIn}
+          addresss={address}
         />
       </div>
-      <div className="w-[85vw] bg-[#dadada] dark:bg-bgColorDarkBlack  dark:text-textWhite ">
+
+      <div className="w-[85%] bg-[#dadada] dark:bg-bgColorDarkBlack  dark:text-textWhite ">
         <div className="px-4">
           {/**Selected filterside bar content grid change and clear filter**/}
           <div className="flex justify-between items-center">
             <div className=" flex flex-col font-[600] text-[18px] py-4">
-              1,235(Doctors available)
+              {numbersOfDoctors}(Doctors available)
             </div>
 
             <div className="flex gap-4 ">
@@ -194,15 +210,17 @@ const FindDoctor = () => {
             <div
               className={`grid-cols-2 desktop:grid-cols-2 grid gap-4 py-4 px-4  `}
             >
-              {doctors.map((doctor) => (
+              {doctors?.map((doctor) => (
                 <Doctors
                   key={doctor?._id}
+                  isActive={doctor?.isActive}
                   name={doctor?.name}
                   availability={doctor?.availability}
                   profileImage={doctor?.profileImage}
                   address={doctor?.address}
                   history={doctor?.history}
                   role={doctor?.role}
+                  specializedIn={doctor?.specialization}
                   show={show}
                   tabletBool={tabletBool}
                   handleToggleShow={handleToggleShow}
@@ -213,6 +231,16 @@ const FindDoctor = () => {
                   show4={show4}
                   Max={doctor?.Max}
                   BookAppointment={BookAppointMent}
+                  globalResizeFunction={globalResizeFunction}
+                  handleMouseOver={handleMouseOver}
+                  handleMouseOut={handleMouseOut}
+                  hoveredField={hoveredField}
+                  disable={disable}
+                  isDisabled={isDisabled}
+                  handleToggleShow4={handleToggleShow4}
+                  handleToggleShow2={handleToggleShow2}
+                  show2={show2}
+                  timings={timings}
                 />
               ))}
             </div>
@@ -239,6 +267,16 @@ const FindDoctor = () => {
                   show4={show4}
                   Max={doctor?.Max}
                   BookAppointment={BookAppointMent}
+                  globalResizeFunction={globalResizeFunction}
+                  handleMouseOver={handleMouseOver}
+                  handleMouseOut={handleMouseOut}
+                  hoveredField={hoveredField}
+                  disable={disable}
+                  isDisabled={isDisabled}
+                  handleToggleShow4={handleToggleShow4}
+                  handleToggleShow2={handleToggleShow2}
+                  show2={show2}
+                  timings={timings}
                 />
               ))}
             </div>

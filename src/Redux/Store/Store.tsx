@@ -5,7 +5,7 @@ import PatientStateReducer from "../slices/Patient.Redux";
 import DoctorStateReducer from "../slices/Doctor.Redux";
 import NotificationReducer from "../slices/Notification.Redux";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
-
+import socketSliceReducer from "../slices/socketRedux";
 const Store = configureStore({
   reducer: {
     stateChange: StateChangeSliceReducer,
@@ -13,7 +13,7 @@ const Store = configureStore({
     patient: PatientStateReducer,
     doctor: DoctorStateReducer,
     notification: NotificationReducer,
-  
+    socket: socketSliceReducer,
   },
 });
 

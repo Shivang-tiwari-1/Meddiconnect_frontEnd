@@ -13,17 +13,36 @@ import PageModel from "../../Utility/PageModel.Utils";
 import { getDoctorData } from "../../Redux/slices/Doctor.Redux";
 import PageModel2 from "../../Utility/PageModel/PageModel2.Utils";
 import { logout } from "../../Redux/slices/signup_login.";
+import { socket } from "../../Constants";
+import listners from "../../Sockets/listners";
+import { useNavigate } from "react-router-dom";
+
+//*****************************Interface**********************************/
+
 const Patient = () => {
+  const navigate = useNavigate();
   //****************************APPSELECTOR*******************************//
   const { patientData, show, Appointmenthistory, show2, show3, show4 } =
     useAppSelector((state) => state.patient);
   const { role } = useAppSelector((state) => state.states);
   const { doctordata } = useAppSelector((state) => state.doctor);
   const { isDark } = useAppSelector((state) => state?.stateChange);
+  //****************************APPSELECTOR*******************************//
+
   //*************************** DISPATCH**********************************//
   const dispatch = useAppDispatch();
+  //*************************** DISPATCH**********************************//
 
   //**************************HANDLEFUNCTION*****************************//
+  useEffect(() => {
+    if (socket.connected) {
+      console.log("inside ");
+      listners("liveMessage", dispatch);
+    }
+    return () => {
+      socket.off("liveMessage");
+    };
+  }, [socket]);
 
   useEffect(() => {
     if (role === "patient") {
@@ -53,11 +72,15 @@ const Patient = () => {
     dispatch(history());
     dispatch(toogleShow2());
   };
+
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logout()).then((action) => {
+      if (action.type === "user/logout/fulfilled") {
+        navigate("/home", { replace: true });
+      }
+    });
   };
 
-  console.log("show", show, "show2", show2, "show3", show3, "show4", show4);
   const data = {};
   if (role === "patient") {
     Object.keys(patientData).forEach((key) => {
@@ -72,7 +95,6 @@ const Patient = () => {
       }
     });
   }
-
   //*******************************HTMLFILE*********************************//
   return (
     <div
@@ -87,7 +109,7 @@ const Patient = () => {
               <p className="flex-shrink-0 w-1/3 text-left">Name:</p>
               <div className="flex-grow flex items-center justify-center ">
                 <p>
-                  {role === "patient" ? patientData?.name : doctordata?.name}
+                  {role === "patient" ? data?.data?.name : data?.data?.name}
                 </p>
               </div>
             </div>
@@ -96,7 +118,7 @@ const Patient = () => {
           {show3 ? (
             <PageModel
               isDark={isDark}
-              address={data?.address}
+              address={data?.data?.address}
               handleToggleShow3={handleToggleShow3}
             />
           ) : (
@@ -105,7 +127,7 @@ const Patient = () => {
                 <p className="flex-shrink-0 w1/3 text-left">Address</p>
                 <div className="flex-grow flex items items-center justify-center">
                   <div className="flex gap-3">
-                    <p>{data?.address?.substring(0, 25)}</p>
+                    <p>{data?.data?.address?.substring(0, 25)}</p>
                     <button onClick={handleToggleShow3}>show...</button>
                   </div>
                 </div>
@@ -117,7 +139,7 @@ const Patient = () => {
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">Phone:</p>
               <div className="flex-grow flex items-center justify-center ">
-                <p>{data?.phone}</p>
+                <p>{data?.data?.phone}</p>
               </div>
             </div>
           </div>
@@ -126,17 +148,23 @@ const Patient = () => {
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">Email:</p>
               <div className="flex-grow flex items-center justify-center ">
-                <p>{data?.email}</p>
+                <p>{data?.data?.email}</p>
               </div>
             </div>
           </div>
 
-          <div className="border-2 rounded-md w-[60] h-11 flex items-center shadow-lg">
+          <div
+            className={`${
+              data?.data?.role === "doctor"
+                ? "hidden"
+                : "border-2 rounded-md w-[60] h-11 flex items-center shadow-lg"
+            }`}
+          >
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">Appointment:</p>
               <div className="flex-grow flex items-center justify-center ">
                 <p>
-                  {data?.appointmentStatus?.length === 0
+                  {data?.data?.appointmentStatus?.length === 0
                     ? "No appointment"
                     : "appointment active"}
                 </p>
@@ -144,11 +172,17 @@ const Patient = () => {
             </div>
           </div>
 
-          <div className="border-2 rounded-md w-[60] h-11 flex items-center shadow-lg">
+          <div
+            className={` ${
+              data?.data?.role === "doctor"
+                ? "hidden"
+                : "border-2 rounded-md w-[60] h-11 flex items-center shadow-lg"
+            }`}
+          >
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">History:</p>
               <div className="flex-grow flex items-center justify-center ">
-                {data?.history?.length === 0 ? (
+                {data?.data?.history?.length === 0 ? (
                   <div>
                     <p>No history</p>
                   </div>
@@ -175,7 +209,7 @@ const Patient = () => {
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">Role:</p>
               <div className="flex-grow flex items-center justify-center ">
-                <p>{data?.role}</p>
+                <p>{data?.data?.role}</p>
               </div>
             </div>
           </div>
