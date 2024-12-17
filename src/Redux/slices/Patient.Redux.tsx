@@ -248,6 +248,7 @@ export const getDoctorDetails = createAsyncThunk(
     }
   }
 );
+
 export const sideBarContent = createAsyncThunk(
   "patient/sideBarContent",
   async (_, { dispatch, rejectWithValue, getState }) => {
@@ -275,6 +276,7 @@ export const sideBarContent = createAsyncThunk(
     }
   }
 );
+
 
 //-----------------------------------API-----------------------------------------------//
 
@@ -378,7 +380,6 @@ const patientState = createSlice({
       const AddAMPM = interval.map(convertTo12HourFormat);
       console.log(state.timings.length);
       if (state.timings.length === 0) {
-
         state.timings.push(AddAMPM);
       } else {
         state.timings = [...AddAMPM];
@@ -390,8 +391,8 @@ const patientState = createSlice({
         state.appointmementdata = {};
       }
       if (key === "day") {
-        state.color = index; 
-        state.appointmementdata.time = ""; 
+        state.color = index;
+        state.appointmementdata.time = "";
       }
       state.appointmementdata[key] = item;
     },

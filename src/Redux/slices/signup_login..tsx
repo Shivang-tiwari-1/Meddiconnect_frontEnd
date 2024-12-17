@@ -33,7 +33,7 @@ export interface Credentials {
   role?: string;
   profileImage?: string;
   address?: string;
-  phone?: string | Number;
+  phone?: string | Number | null;
   gender?: string;
 }
 
@@ -52,6 +52,11 @@ interface UserData {
     role: string;
     specialization: Array<{ field?: string; years?: number }>;
   };
+}
+
+interface coordinates {
+  latitude: number;
+  longitude: number;
 }
 
 interface stateManagement {
@@ -96,6 +101,8 @@ interface stateManagement {
   intervalMinutes?: number;
   totalMinutes?: number;
   timings?: string[];
+  geolocation?: any;
+  coordinates?: coordinates;
 }
 
 //-----------------------------------interfaces----------------------------------------//
@@ -106,6 +113,10 @@ export const signup = createAsyncThunk(
   "user/signup",
   async (formData: FormData, { dispatch, rejectWithValue }) => {
     try {
+      for (let [key, value] of formData) {
+        console.log(key, value);
+      }
+
       const response = await axiosInstance.post(
         `/api/authenticate/createuser`,
         formData,
@@ -222,6 +233,23 @@ export const refresh = createAsyncThunk(
     }
   }
 );
+
+export const getAddressFromCoordinates = createAsyncThunk(
+  "user/geoCoordinate",
+  async ({ latitude, longitude }: any, { rejectWithValue }) => {
+    try {
+      const response = await axios.get(
+        `https://api.opencagedata.com/geocode/v1/json?q=${latitude}+${longitude}&key=${"c9fe87d9e2d44cbcb1f4537850c7971b"}`
+      );
+      const address = response.data.results[0]?.formatted;
+      console.log(address);
+      return address;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data);
+    }
+  }
+);
+
 //-----------------------------------API-----------------------------------------------//
 
 const initialState: stateManagement = {
@@ -244,11 +272,16 @@ const initialState: stateManagement = {
   alert: null,
   status: null,
   credentials: {
+    name: "",
     email: "",
     password: "",
     role: "",
     gender: "",
+    profileImage: "",
+    address: "",
+    phone: null,
   },
+
   hoveredField: "",
   userData: {
     data: {
@@ -286,6 +319,11 @@ const initialState: stateManagement = {
   totalMinutes: 0,
   intervalMinutes: 15,
   timings: [],
+  geolocation: "",
+  coordinates: {
+    latitude: 0,
+    longitude: 0,
+  },
 };
 
 const signup_login = createSlice({
@@ -349,6 +387,14 @@ const signup_login = createSlice({
         state.currentStep += action.payload;
         state.proggresWidth =
           ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
+      }
+    },
+    set_coordinates: (state, action) => {
+      const { lat, lng } = action.payload;
+
+      if (state.coordinates) {
+        state.coordinates.latitude = lat;
+        state.coordinates.longitude = lng;
       }
     },
   },
@@ -489,6 +535,20 @@ const signup_login = createSlice({
 
       .addCase(refresh?.rejected, (state) => {
         state.loading = false;
+      })
+      .addCase(getAddressFromCoordinates?.fulfilled, (state, action) => {
+        state.geolocation = action.payload;
+        if (action.payload) {
+          state.geolocation = action.payload;
+          state.credentials.address = state.geolocation;
+          state.loading = false;
+        }
+      })
+      .addCase(getAddressFromCoordinates?.pending, (state, action) => {
+        state.loading = true;
+      })
+      .addCase(getAddressFromCoordinates?.rejected, (state, action) => {
+        state.loading = false;
       });
   },
 });
@@ -506,6 +566,7 @@ export const {
   setCredentials,
   setHoverField,
   progressBar,
+  set_coordinates,
 } = signup_login.actions;
 
 export default signup_login.reducer;

@@ -229,7 +229,13 @@ const DoctroPageModel = (props: data) => {
                   <p className="text-xl font-bold ">Next</p>
                 </div>
 
-                <div className=" w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2">
+                <div
+                  className={`w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2 ${
+                    !show4
+                      ? "transition-all duration-300 ease-in-out transform hover:scale-105  shadow hover:shadow-lg cursor-pointer"
+                      : ""
+                  } `}
+                >
                   {!show4 ? (
                     <button onClick={handleToggleShow4}>
                       <FaUserDoctor size={30} />

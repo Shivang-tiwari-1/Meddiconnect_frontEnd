@@ -45,7 +45,7 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
   };
 
   return (
-    <div className="fixed inset-0 flex items-end justify-center z-30 ">
+    <div className="fixed inset-0 flex items-end justify-center  ">
       <div className=" border-2  w-full desktop:w-[80%] h-[80vh] bg-white rounded-t-xl overflow-x-scroll custom-scrollbar ">
         <div className="flex justify-center items-center">
           <div className="border-2 w-16 border-gray-500 rounded-full"></div>
