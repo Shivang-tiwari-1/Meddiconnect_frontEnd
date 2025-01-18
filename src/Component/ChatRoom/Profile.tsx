@@ -17,7 +17,7 @@ const Profile = ({ DoctorData, isDark }: incomingData) => {
       >
         <a className="border-2 rounded-full w-[4rem] h-[3rem] flex justify-center items-center">
           <img
-            src={`http://localhost:5000/images/${DoctorData?.profileImage}`}
+            src={DoctorData?.profileImage}
             alt="Profile"
             className="w-full h-full object-contain rounded-full"
           />
@@ -34,7 +34,7 @@ const Profile = ({ DoctorData, isDark }: incomingData) => {
           {DoctorData?.name}
         </a>
       </div>
-      <div className="flex  justify-end w-[20%]">
+      <div className="flex  justify-end w-[20%] cursor-pointer ">
         {isDark ? (
           <IoIosCall size={30} color={textWhite} />
         ) : (

@@ -26,7 +26,6 @@ const LeftScrollBar = ({
 }: incomingData) => {
   //****************************APP_SELECTORS*******************************/
   const { searchQuery } = useAppSelector((state) => state?.patient);
-
   //*******************************DIPATCH************************************/
   const dispatch = useAppDispatch();
 
@@ -72,19 +71,22 @@ const LeftScrollBar = ({
       {filterResults?.length === 0
         ? doctors?.map((data) => (
             <button
+              key={data?._id}
               className="flex  w-full space-y-2  h-[6vh] p-2  border-b-[0.25px] items-center"
               onClick={() => handleToggleShow?.(data?._id)}
             >
-              <div className=" flex gap-2 w-full" key={data?._id}>
-                <div className="px-2 w-[70px] h-[50px]">
-                  <img
-                    src={`http://localhost:5000/images/${data?.profileImage}`}
-                    alt="Profile"
-                    className="w-full h-full object-contain rounded-full"
-                  />
-                </div>
+              <div className=" flex gap-2 w-full items-center" key={data?._id}>
+                <div className="px-2 flex items-center gap-2">
+                  <div className="w-[60px] h-[50px] ">
+                    <img
+                      src={data?.profileImage}
+                      alt="Profile"
+                      className="w-full h-full object-contain rounded-full"
+                    />
+                  </div>
 
-                <div className="text-sm font-light">{data?.name}</div>
+                  <div className="text-sm font-light">{data?.name}</div>
+                </div>
               </div>
             </button>
           ))
@@ -96,7 +98,7 @@ const LeftScrollBar = ({
               <div className=" flex gap-2 w-full" key={data?._id}>
                 <div className="px-2 w-[70px] h-[50px]">
                   <img
-                    src={`http://localhost:5000/images/${data?.profileImage}`}
+                    src={data?.profileImage}
                     alt="Profile"
                     className="w-full h-full object-contain rounded-full"
                   />

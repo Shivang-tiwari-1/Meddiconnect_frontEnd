@@ -39,7 +39,7 @@ const Patients: React.FC<incomingData> = ({
   };
   //****************HANDLEFUNCTION****************/
   const lengthChaeck = patientData?.length > 1;
-  console.log(patientData)
+ 
   return (
     <div
       className={`flex justify-center items-center h-[70vh]  ${

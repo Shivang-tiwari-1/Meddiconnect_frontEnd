@@ -1,11 +1,9 @@
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
-import { GetNotification } from "../../Redux/slices/Notification.Redux";
 import { socket } from "../../Constants";
-import {
-  receivedmessage,
-  sendDataSocket,
-} from "../../Sockets/Initialize_socket";
+import { sendDataSocket } from "../../Sockets/Initialize_socket";
+
+import { sideBarContent } from "../../Redux/slices/Patient.Redux";
 
 const Home = () => {
   if (navigator.geolocation) {
@@ -30,11 +28,17 @@ const Home = () => {
       return "Location not found.";
     }
   }
-  const { doc_accessToken, pat_accessToken, userData } = useAppSelector(
-    (state) => state.states
-  );
+
+  const { userData } = useAppSelector((state) => state.states);
   const { isDark } = useAppSelector((state) => state.stateChange);
   const dispatch = useAppDispatch();
+  console.log("-------------->", userData?.data);
+  useEffect(() => {
+    if (socket.connected) {
+      sendDataSocket(dispatch, socket, userData?.data);
+      dispatch(sideBarContent());
+    }
+  }, [socket]);
 
   return (
     <div

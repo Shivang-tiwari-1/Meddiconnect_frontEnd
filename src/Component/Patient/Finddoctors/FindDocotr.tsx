@@ -19,22 +19,32 @@ import {
 } from "../../../Redux/slices/Patient.Redux";
 import Doctors from "./Doctors";
 import { globalResizeFunction } from "../../../Utility/resizer.Utils";
-import { FixedSizeList as List } from "react-window";
-import { setHoverField } from "../../../Redux/slices/signup_login.";
+import {
+  set_hashed_id,
+  setHoverField,
+} from "../../../Redux/slices/signup_login.";
 
 const FindDoctor = () => {
-  const [selectedState, setSelectedState] = useState<string[]>([]);
   const dispatch = useAppDispatch();
+  const [selectedState, setSelectedState] = useState<string[]>([]);
+
   //--------------------------------------------App-selectors---------------------------------//
 
-  const { tabletBool, mobileBool, hoveredField, timings } = useAppSelector(
-    (state) => state.states
-  );
+  const {
+    tabletBool,
+    mobileBool,
+    hoveredField,
+    timings,
+    hashedData,
+    docisActive,
+    doctorData,
+    patientData,
+  } = useAppSelector((state) => state.states);
   const {
     show,
     show4,
     show2,
-    openDoctorId,
+    openUserId,
     doctor,
     specializedIn,
     address,
@@ -47,7 +57,7 @@ const FindDoctor = () => {
 
   //--------------------------------------------functions---------------------------------//
   const handleToggleShow = (doctorId: string | null) => {
-    if (openDoctorId === doctorId) {
+    if (openUserId === doctorId) {
       dispatch(setOpenDoctorId(null));
     } else {
       const fetch_doc = doctors?.find((index) => {
@@ -55,16 +65,18 @@ const FindDoctor = () => {
       });
 
       if (fetch_doc?.availability.length > 0) {
+        console.log(doctorId);
         dispatch(setOpenDoctorId(doctorId));
       }
     }
   };
+
   const handleToggleShow4 = () => {
     dispatch(toogleShow4());
   };
+
   useEffect(() => {
-    dispatch(fetchAllDoctors());
-    dispatch(sideBarContent());
+    dispatch(fetchAllDoctors()).then((action) => {});
   }, [dispatch]);
 
   const clearFilter = () => {
@@ -227,7 +239,7 @@ const FindDoctor = () => {
                   mobileBool={mobileBool}
                   isDark={isDark}
                   id={doctor?._id}
-                  openDoctorId={openDoctorId}
+                  openUserId={openUserId}
                   show4={show4}
                   Max={doctor?.Max}
                   BookAppointment={BookAppointMent}
@@ -241,6 +253,7 @@ const FindDoctor = () => {
                   handleToggleShow2={handleToggleShow2}
                   show2={show2}
                   timings={timings}
+                  docisActive={doctorData?.userData?.data?.isActive}
                 />
               ))}
             </div>
@@ -248,7 +261,7 @@ const FindDoctor = () => {
             <div
               className={`grid-row desktop:grid-cols-3 mobile:grid-rows-1 grid gap-4 py-4 px-4  `}
             >
-              {doctors.map((doctor) => (
+              {doctors?.map((doctor) => (
                 <Doctors
                   key={doctor?._id}
                   name={doctor?.name}
@@ -263,7 +276,7 @@ const FindDoctor = () => {
                   mobileBool={mobileBool}
                   isDark={isDark}
                   id={doctor?._id}
-                  openDoctorId={openDoctorId}
+                  openUserId={openUserId}
                   show4={show4}
                   Max={doctor?.Max}
                   BookAppointment={BookAppointMent}
@@ -277,6 +290,7 @@ const FindDoctor = () => {
                   handleToggleShow2={handleToggleShow2}
                   show2={show2}
                   timings={timings}
+                  docisActive={doctorData?.userData?.data?.isActive}
                 />
               ))}
             </div>

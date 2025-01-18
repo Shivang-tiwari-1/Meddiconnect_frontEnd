@@ -1,15 +1,12 @@
 import React from "react";
-import SmallProfileCard from "../../UtilityComponents/SmallProfileCard";
+import PatientProfileCard from "../../../UtilityComponents/PatientProfileCard";
 
-interface doctros {
+interface patients {
   key?: string;
   name?: string;
-  availability?: [];
   profileImage?: string;
   role?: string;
   show?: boolean;
-  tabletBool?: boolean;
-  specializedIn?: string[];
   handleToggleShow: (id: string | null) => void;
   address?: string;
   history?: [];
@@ -22,9 +19,6 @@ interface doctros {
   isDark?: boolean;
   id?: any;
   openUserId: string | null;
-  Max?: number;
-  BookAppointment?: () => void;
-  globalResizeFunction?: () => void;
   handleMouseOver?: (feildname: string) => void;
   handleMouseOut?: () => void;
   hoveredField?: string;
@@ -33,81 +27,59 @@ interface doctros {
   isDisabled?: (id: any) => void;
   handleToggleShow2?: () => void;
   timings?: any;
-  docisActive?: boolean;
 }
-
-const Doctors = ({
+const PatientMap: React.FC<patients> = ({
   name,
-  role,
   profileImage,
-  availability,
-  handleToggleShow,
-  tabletBool,
+  role,
+  show,
+  handleToggleShow2,
+  handleToggleShow3,
   address,
   history,
   show2,
   show3,
-  handleToggleShow3,
-  show4,
-  handleToggleShow4,
   isDark,
   id,
   openUserId,
-  Max,
-  globalResizeFunction,
-  handleMouseOut,
   handleMouseOver,
+  handleMouseOut,
   hoveredField,
   isActive,
-  specializedIn,
-  handleToggleShow2,
+  disable,
+  isDisabled,
   timings,
-  docisActive,
-}: doctros) => {
+}) => {
   const isOpen = openUserId === id;
-  const now = new Date();
-  const currentDate = now
-    ?.toLocaleDateString("en-US", { weekday: "long" })
-    .toLowerCase();
   return (
     <div
-      className={`border rounded-[50px] w-[100%] bg-white opacity-9 shadow-2xl ${
+      className={`border rounded-[50px] w-[100%]  opacity-9 shadow-2xl ${
         isDark ? "dark" : ""
       }  dark:bg-bgColorDarkBlack   `}
     >
       <div className="w-full tablet:w-full tablet:h-[100px] rounded-t bg-cover flex justify-start items-center">
-        <SmallProfileCard
+        <PatientProfileCard
           name={name}
           profileImage={profileImage}
           role={role}
-          availability={availability}
           show={isOpen}
-          tabletBool={tabletBool}
-          handleToggleShow={() => handleToggleShow(id)}
           address={address}
           history={history}
           show2={show2}
           show3={show3}
           handleToggleShow3={handleToggleShow3}
-          handleToggleShow4={handleToggleShow4}
-          show4={show4}
           id={id}
-          Max={Max}
           isDark={isDark}
-          currentDate={currentDate}
-          globalResizeFunction={globalResizeFunction}
           handleMouseOut={handleMouseOut}
           handleMouseOver={handleMouseOver}
           hoveredField={hoveredField}
           isActive={isActive}
-          specializedIn={specializedIn}
           handleToggleShow2={handleToggleShow2}
           timings={timings}
-          docisActive={docisActive}
         />
       </div>
     </div>
   );
 };
 
-export default Doctors;
+export default PatientMap;

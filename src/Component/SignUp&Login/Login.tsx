@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import {
   login,
+  set_hashed_id,
   setCredentials,
   setHoverField,
   toggleShowPassword,
@@ -9,13 +10,23 @@ import {
 } from "../../Redux/slices/signup_login.";
 import Button from "../UtilityComponents/Button";
 import { Link, useNavigate } from "react-router-dom";
+import { hashData } from "../../Hashing/hashing";
 
 const Login = () => {
   const navigate = useNavigate();
 
   //**************************APPSELECTOR****************/
-  const { showPassword, mobile, credentials, hoveredField, role } =
-    useAppSelector((state) => state.states);
+  const {
+    showPassword,
+    mobile,
+    credentials,
+    hoveredField,
+    role,
+    userData,
+    hashedData,
+    doc_accessToken,
+    pat_accessToken,
+  } = useAppSelector((state) => state.states);
   const { isDark } = useAppSelector((state) => state.stateChange);
   //*************************DISPATCH********************/
   const dispatch = useAppDispatch();
@@ -43,7 +54,7 @@ const Login = () => {
           if (credentials?.role === "doctor") {
             navigate("/DocHome", { replace: true });
           } else if (credentials?.role === "patient") {
-            navigate("/home", { replace: true });
+            navigate(`/home`, { replace: true });
           }
         }, 100);
       }
@@ -76,6 +87,16 @@ const Login = () => {
   const handleMouseOut = () => {
     dispatch(setHoverField(""));
   };
+
+  useEffect(() => {
+    if (userData?.data?.role === "patient") {
+      const fetchData = async () => {
+        const hashing = await hashData(userData?.data?._id.toString());
+        dispatch(set_hashed_id(hashing));
+      };
+      fetchData();
+    }
+  }, [dispatch]);
 
   return (
     <div

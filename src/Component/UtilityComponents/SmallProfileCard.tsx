@@ -1,9 +1,7 @@
 import React from "react";
-import Button from "./Button";
-import { useAppSelector } from "../../Redux/Store/Store";
-import PageModel from "../../Utility/PageModel.Utils";
 import DoctroPageModel from "./DoctroPageModel.Utility";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
+import { useAppSelector } from "../../Redux/Store/Store";
 
 interface data {
   name?: string;
@@ -36,6 +34,7 @@ interface data {
   timings?: any;
   hoveredField?: string;
   isActive?: boolean;
+  docisActive?: boolean;
 }
 
 const SmallProfileCard = (props: data) => {
@@ -55,6 +54,7 @@ const SmallProfileCard = (props: data) => {
     show4,
     handleToggleShow4,
     isDark,
+    
     id,
     doctor,
     Max,
@@ -66,10 +66,10 @@ const SmallProfileCard = (props: data) => {
     isActive,
     specializedIn,
     timings,
+    docisActive
   } = props;
 
   globalResizeFunction();
-
   return (
     <>
       {show ? (
@@ -133,7 +133,7 @@ const SmallProfileCard = (props: data) => {
           <div
             className={`w-[4rem] flex justify-center items-center flex-col gap-2`}
           >
-            {!isActive ? (
+            {!docisActive ? (
               <div className="border-2 w-3 h-3 rounded-full bg-primaryRed"></div>
             ) : (
               <div className="border-2 w-3 h-3 rounded-full bg-primaryGreen"></div>

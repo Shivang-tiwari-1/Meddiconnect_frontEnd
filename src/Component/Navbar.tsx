@@ -133,6 +133,11 @@ const Navbar = () => {
                     By criteria
                   </div>
                 </Link>
+                <Link to="/FinalChatroom">
+                  <div className="cursor-pointer hover:bg-primaryBlue px-6 py-2 hover:text-textWhite">
+                    Chats
+                  </div>
+                </Link>
               </div>
             </div>
           </>

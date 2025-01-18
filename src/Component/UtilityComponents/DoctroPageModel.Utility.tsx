@@ -1,16 +1,18 @@
 import React, { useState } from "react";
-import { globalResizeFunction } from "../../Utility/resizer.Utils";
 import { IoArrowBackCircle } from "react-icons/io5";
 import BookeAppointManually from "../../Utility/PageModel/BookeAppointManually";
 import { FaUserDoctor } from "react-icons/fa6";
 import {
   BookAppointMent,
+  setOpenDoctorById,
   setOpenDoctorId,
+  toogleShow,
 } from "../../Redux/slices/Patient.Redux";
 import { useAppDispatch } from "../../Redux/Store/Store";
 import { BsCalendar2DateFill } from "react-icons/bs";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoChatbubble } from "react-icons/io5";
+import { set_hashed_id } from "../../Redux/slices/signup_login.";
 
 interface AvailabilityItem {
   day?: string;
@@ -50,6 +52,8 @@ interface data {
   timings?: any;
 }
 const DoctroPageModel = (props: data) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const {
     profileImage,
     handleToggleShow,
@@ -70,6 +74,7 @@ const DoctroPageModel = (props: data) => {
   } = props;
   const [click, SetClick] = useState(false);
   const [change, StateChange] = useState(" ");
+  const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
 
   const check_day =
@@ -82,12 +87,15 @@ const DoctroPageModel = (props: data) => {
       return index?.day === currentDate;
     }) || [];
 
-  const handlesrs = (id) => {
-    dispatch((dispatch) => {
-      dispatch(setOpenDoctorId(null));
-    });
-    handleToggleShow4?.();
+  const handleClick = () => {
+    dispatch(setOpenDoctorById(id));
   };
+
+  const multiple_Actions = () => {
+    handleToggleShow4?.();
+    dispatch(setOpenDoctorId(null));
+  };
+
   return (
     <div className="fixed inset-0 flex items-center justify-evenly bg-black bg-opacity-80 ">
       <div
@@ -126,8 +134,8 @@ const DoctroPageModel = (props: data) => {
           {!click ? (
             <>
               <button
-                onMouseOver={() => handleMouseOver("available dates")}
-                onMouseOut={() => handleMouseOut()}
+                onMouseOver={() => handleMouseOver?.("available dates")}
+                onMouseOut={() => handleMouseOut?.()}
                 onClick={() => SetClick(true)}
                 className="relative transition-transform transform hover:scale-110"
               >
@@ -179,7 +187,16 @@ const DoctroPageModel = (props: data) => {
               </div>
             </div>
           )}
-          <IoChatbubble size={33} />
+          {
+            <div
+              className="flex justify-center items-center cursor-pointer"
+              onClick={handleClick}
+            >
+              <Link to={"/FinalChatroom"}>
+                <IoChatbubble size={33} />
+              </Link>
+            </div>
+          }
         </div>
         <div
           className={`flex flex-col justify-around py-3  w-[45%] h-[50vh] ${
@@ -237,7 +254,7 @@ const DoctroPageModel = (props: data) => {
                   } `}
                 >
                   {!show4 ? (
-                    <button onClick={handleToggleShow4}>
+                    <button onClick={multiple_Actions}>
                       <FaUserDoctor size={30} />
                     </button>
                   ) : (

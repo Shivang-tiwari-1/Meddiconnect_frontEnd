@@ -1,6 +1,10 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { axiosPrivate } from "../../Api/Axios.Api";
-import { toggleAlertCheck, toggleStatusCheck } from "./signup_login.";
+import {
+  set_hashed_id,
+  toggleAlertCheck,
+  toggleStatusCheck,
+} from "./signup_login.";
 import { convertToLocalTime2 } from "../../Utility/Function";
 import {
   convertAMPMToISO,
@@ -8,6 +12,7 @@ import {
   generateTimeIntervals,
   hours,
 } from "../../Services/service";
+import { useLocation, useNavigate } from "react-router-dom";
 
 //-----------------------------------interfaces----------------------------------------//
 interface patientPayload {
@@ -32,7 +37,7 @@ interface patientState {
   show4?: boolean;
   searchQuery?: searchQuery;
   showDoctorByid?: object | null;
-  openDoctorId?: string | null;
+  openUserId?: string | null;
   address: string[];
   doctor: string[];
   specializedIn: object[];
@@ -53,9 +58,14 @@ export const fetchAllDoctors = createAsyncThunk(
   "patient/fetchAllDoctors",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axiosPrivate.get(`/api/patient/fetchalldoctors`);
+      const response = await axiosPrivate.get(`/api/patient/fetchalldoctors`, {
+        params: {
+          redisKey: "fetchAllDoctors",
+        },
+      });
 
       if (response) {
+        console.log(response);
         return response?.data?.data;
       }
     } catch (error) {
@@ -79,9 +89,16 @@ export const getUserData = createAsyncThunk(
   "patient/getUserData",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axiosPrivate.get(`/api/patient/getData`);
+      const response = await axiosPrivate.get(`/api/patient/getData`, {
+        params: {
+          redisKey: "getUserData",
+        },
+      });
       console.log(response);
-      return response?.data;
+
+      if (response) {
+        return response?.data;
+      }
     } catch (error) {
       const statusCode = error?.response?.status;
       if (statusCode === 400) {
@@ -102,10 +119,14 @@ export const getUserData = createAsyncThunk(
 export const BookAppointMent = createAsyncThunk(
   "patient/BookAppointMent",
   async (id, { dispatch, rejectWithValue }) => {
-    console.log(id);
     try {
       const response = await axiosPrivate.post(
-        `/api/patient/makeappointment/${id}`
+        `/api/patient/makeappointment/${id}`,
+        {
+          params: {
+            redisKey: "BookAppointMent",
+          },
+        }
       );
       if (response) {
         dispatch(toggleAlertCheck("Appointment Booked"));
@@ -134,7 +155,12 @@ export const CancleAppointment = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.post(
-        `/api/patient/cancleappointment/${id}`
+        `/api/patient/cancleappointment/${id}`,
+        {
+          params: {
+            redisKey: "CancleAppointment",
+          },
+        }
       );
       if (response) {
         dispatch(toggleAlertCheck("Appointment cancled"));
@@ -162,7 +188,11 @@ export const history = createAsyncThunk(
   "patient/history",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axiosPrivate.get(`/api/patient/history`);
+      const response = await axiosPrivate.get(`/api/patient/history`, {
+        params: {
+          redisKey: "history",
+        },
+      });
       return response?.data;
     } catch (error) {
       const statusCode = error?.response?.status;
@@ -226,7 +256,12 @@ export const getDoctorDetails = createAsyncThunk(
   async (id, { dispatch, rejectWithValue }) => {
     try {
       const resposne = await axiosPrivate.get(
-        `/api/patient/doctorDetail/${id}`
+        `/api/patient/doctorDetail/${id}`,
+        {
+          params: {
+            redisKey: "getDoctorDetails",
+          },
+        }
       );
       return resposne?.data?.data;
     } catch (error) {
@@ -254,10 +289,14 @@ export const sideBarContent = createAsyncThunk(
   async (_, { dispatch, rejectWithValue, getState }) => {
     try {
       const resposne = await axiosPrivate.get(
-        `api/patient/fetchsidebarcontent`
+        `api/patient/fetchsidebarcontent`,
+        {
+          params: {
+            redisKey: "fetchsidebarcontent",
+          },
+        }
       );
       if (Response) {
-        console.log(resposne);
         return resposne.data;
       }
     } catch (error) {
@@ -276,7 +315,6 @@ export const sideBarContent = createAsyncThunk(
     }
   }
 );
-
 
 //-----------------------------------API-----------------------------------------------//
 
@@ -336,7 +374,7 @@ const patientState = createSlice({
       state.show4 = !state.show4;
     },
     setOpenDoctorId: (state, action) => {
-      state.openDoctorId = action?.payload;
+      state.openUserId = action?.payload;
     },
     setSearchQuery: (
       state,

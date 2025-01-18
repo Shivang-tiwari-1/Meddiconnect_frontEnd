@@ -39,7 +39,7 @@ const SchedulePageModel: React.FC<incomingData> = ({
 }) => {
   const [show, setShow] = useState(false);
   const dispatch = useAppDispatch();
-
+  console.log(collectDay);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">

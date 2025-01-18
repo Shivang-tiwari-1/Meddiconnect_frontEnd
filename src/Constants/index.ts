@@ -22,3 +22,4 @@ export const searchButtonStyles =
 export const socket = io("http://localhost:5000", {
   withCredentials: true,
 });
+

@@ -4,8 +4,11 @@ import signup_loginReducer from "../slices/signup_login.";
 import PatientStateReducer from "../slices/Patient.Redux";
 import DoctorStateReducer from "../slices/Doctor.Redux";
 import NotificationReducer from "../slices/Notification.Redux";
+import MessageSliceReducer from "../slices/Message.Redux";
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import socketSliceReducer from "../slices/socketRedux";
+import { socket } from "../../Constants";
+import { socketMiddleware } from "../Middleware/SocketMiddleware";
 const Store = configureStore({
   reducer: {
     stateChange: StateChangeSliceReducer,
@@ -14,7 +17,9 @@ const Store = configureStore({
     doctor: DoctorStateReducer,
     notification: NotificationReducer,
     socket: socketSliceReducer,
+    MessageSlice: MessageSliceReducer,
   },
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware(socket))
 });
 
 export type RootState = ReturnType<typeof Store.getState>;

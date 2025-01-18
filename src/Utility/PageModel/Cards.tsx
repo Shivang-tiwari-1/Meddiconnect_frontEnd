@@ -52,7 +52,6 @@ const Cards: React.FC<incomingdata> = ({
   availabilityExists,
   specializationExists,
 }) => {
-  console.log(qualificationExists, availabilityExists, specializationExists);
   return (
     <>
       {/* Document Card */}

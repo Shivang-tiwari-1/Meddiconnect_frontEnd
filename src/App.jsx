@@ -5,7 +5,6 @@ import {
   Route,
   useLocation,
 } from "react-router-dom";
-import FinalChatroom from "./Component/ChatRoom/FinalChatroom";
 import Navbar from "./Component/Navbar";
 import SignUp from "./Component/SignUp&Login/SignUp";
 import Login from "./Component/SignUp&Login/Login";
@@ -19,9 +18,11 @@ import Notification from "./Component/Notofication/Notification";
 import Prescripemedicine from "./Component/Doctor/Prescripemedicine";
 import DocHome from "./Component/Doctor/DocHome";
 import Notify from "./Component/UtilityComponents/Notify";
+import All_patients from "./Component/Doctor/DocHomeComponents/All_patients/All_patients";
+import FinalChatroom from "./Component/ChatRoom/FinalChatroom";
+
 function App() {
   const location = useLocation();
-
   return (
     <>
       {location.pathname !== "" && <Navbar />}
@@ -33,14 +34,15 @@ function App() {
           <Route path="/signup" element={<SignUp />} />
           <Route path="/login" element={<Login />} />
           <Route path="/home" element={<Home />} />
-          <Route path="/account" element={<Patient />} />
+          <Route path="/account" element={<Patient />} /> v
           <Route path="/Notification" element={<Notification />} />
+          <Route path="/FinalChatroom" element={<FinalChatroom />} />
           {/* Doctor Routes */}
           <Route element={<RequiredAuthPatinet allowedRoles={["doctor"]} />}>
             <Route path="/DocHome" element={<DocHome />} />
             <Route path="/prescripe" element={<Prescripemedicine />} />
+            <Route path="/All_patients" element={<All_patients />} />
           </Route>
-
           {/* Patient Routes */}
           <Route element={<RequiredAuthPatinet allowedRoles={["patient"]} />}>
             <Route path="/findDoctor" element={<FindDoctor />} />

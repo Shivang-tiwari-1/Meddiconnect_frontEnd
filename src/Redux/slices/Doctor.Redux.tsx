@@ -29,6 +29,7 @@ export interface CollectedDay {
   showInput?: boolean;
   showTimeStart?: boolean;
   showTimeEnd?: boolean;
+  index?: number;
 }
 
 export interface doctorPayload {
@@ -62,7 +63,8 @@ interface stateManagement {
   totalSteps: number;
   expertise: string[];
   select?: string[];
-  collectDay?: CollectedDay[];
+  collectDay?:
+  CollectedDay[],
   drop?: boolean;
   proggresWidth: number | null;
   scroll: number;
@@ -127,6 +129,7 @@ export const getDetailOfthePatient = createAsyncThunk(
   async (_, { dispatch, rejectWithValue }) => {
     try {
       const response = await axiosPrivate.get(`api/doctor/getAllUser`);
+      console.log(response);
       return response?.data;
     } catch (error) {
       const statusCode = error?.response?.status;
@@ -364,6 +367,60 @@ const initialState: stateManagement = {
       showTimeStart: false,
       showTimeEnd: false,
     },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
+    {
+      HowManyPatients: null,
+      day: null,
+      start: null,
+      end: null,
+      showInput: false,
+      showTimeStart: false,
+      showTimeEnd: false,
+    },
   ],
   drop: false,
   proggresWidth: null,
@@ -382,7 +439,6 @@ const initialState: stateManagement = {
   specializationExists: false,
   qualificationExists: false,
   availabilityExists: false,
-
 };
 
 const DoctorState = createSlice({
@@ -465,7 +521,6 @@ const DoctorState = createSlice({
     setCollectedDay: (state, action) => {
       const { HowManyPatients, day, start, end, index } = action.payload;
       const checkIndex = state?.collectDay?.[index] !== undefined;
-
       if (!state.collectDay) {
         return;
       } else {
@@ -484,6 +539,7 @@ const DoctorState = createSlice({
                 showInput: true,
                 showTimeStart: true,
                 showTimeEnd: true,
+                index: index,
               };
             }
             return entry;
@@ -500,6 +556,7 @@ const DoctorState = createSlice({
               showInput: true,
               showTimeStart: true,
               showTimeEnd: true,
+              index: index,
             });
           }
         }
@@ -567,9 +624,9 @@ const DoctorState = createSlice({
       .addCase(setCriteria.rejected, (state, action) => {
         state.loading = false;
       })
-      .addCase(manualUpdate.fulfilled, (state, action) => {})
-      .addCase(manualUpdate.pending, (state, action) => {})
-      .addCase(manualUpdate.rejected, (state, action) => {})
+      .addCase(manualUpdate.fulfilled, (state, action) => { })
+      .addCase(manualUpdate.pending, (state, action) => { })
+      .addCase(manualUpdate.rejected, (state, action) => { })
       .addCase(spealisesIn.rejected, (state, action) => {
         state.loading = false;
       })
@@ -578,8 +635,7 @@ const DoctorState = createSlice({
       })
       .addCase(spealisesIn.fulfilled, (state, action) => {
         state.loading = false;
-      })
-    
+      });
   },
 });
 
@@ -594,7 +650,6 @@ export const {
   setDrop,
   filterCollectionDay,
   setscroll,
-  scrollThrough,
 } = DoctorState.actions;
 
 export default DoctorState.reducer;

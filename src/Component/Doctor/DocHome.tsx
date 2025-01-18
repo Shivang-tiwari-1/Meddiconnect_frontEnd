@@ -8,7 +8,10 @@ import {
   toogleShow3,
   toogleShow4,
 } from "../../Redux/slices/Patient.Redux";
-import { setHoverField } from "../../Redux/slices/signup_login.";
+import {
+  set_doc_isActive,
+  setHoverField,
+} from "../../Redux/slices/signup_login.";
 import {
   filterCollectionDay,
   getDetailOfthePatient,
@@ -17,6 +20,7 @@ import {
 import Patients from "./DocHomeComponents/Patients";
 import { socket } from "../../Constants";
 import {
+  listen_message,
   receivedmessage,
   sendDataSocket,
 } from "../../Sockets/Initialize_socket";
@@ -24,6 +28,7 @@ import Cards from "../../Utility/PageModel/Cards";
 import listners from "../../Sockets/listners";
 
 const DocHome = () => {
+  const dispatch = useAppDispatch();
   //*******************AppSelectors********************** */
   const { isDark } = useAppSelector((state) => state.stateChange);
 
@@ -62,32 +67,28 @@ const DocHome = () => {
   } = useAppSelector((state) => state.states);
 
   //*******************AppSelectors********************** */
-
-  //********************dispatcher***********************//
-  const dispatch = useAppDispatch();
-  //********************dispatcher***********************//
-
+console.log(socket.id)
   //********************hooks***********************//
   useEffect(() => {
     if (socket.connected) {
-      sendDataSocket(dispatch, socket, userData);
-
-      receivedmessage(socket, dispatch);
+      sendDataSocket(dispatch, socket, userData?.data);
+      // receivedmessage(socket, dispatch);
     }
   }, [socket]);
 
   useEffect(() => {
     if (socket.connected) {
-      listners("liveMessage", dispatch);
+      listners("listen_to_message", dispatch);
+
     }
     return () => {
-      socket.off("liveMessage");
+      socket.off("listen_to_message");
     };
   }, [socket]);
 
   useEffect(() => {
     dispatch(getDetailOfthePatient());
-   
+    dispatch(set_doc_isActive());
   }, [dispatch]);
 
   //********************hooks***********************//
@@ -128,9 +129,8 @@ const DocHome = () => {
 
   return (
     <div
-      className={`${
-        isDark ? "bg-black" : "bg-white"
-      } flex justify-center items-center w-full h-auto`}
+      className={`${isDark ? "bg-black" : "bg-white"
+        } flex justify-center items-center w-full h-auto`}
     >
       <div className="flex flex-col h-auto items-center  mobile:w-full desktop:w-[100%] laptop:w-[100%] tablet:w-[100%]">
         {/* //first-element div child-start*/}
@@ -143,9 +143,8 @@ const DocHome = () => {
           </div>
           {!value && document !== undefined ? (
             <div
-              className={`flex  flex-col justify-center items-center py-5 ${
-                userData?.data?.availability.length === 0 ? "hidden" : ""
-              }`}
+              className={`flex  flex-col justify-center items-center py-5 ${userData?.data?.availability.length === 0 ? "hidden" : ""
+                }`}
             >
               <p className="text-2xl font-[500]">Next session in</p>
               <div>{startTime ? <Time startTime={startTime} /> : ""}</div>
@@ -172,13 +171,12 @@ const DocHome = () => {
 
         {/* //second-element div child-start*/}
         {userData?.data.qualification?.length === 0 ||
-        userData?.data?.specialization?.length === 0 ||
-        userData?.data?.availability.length === 0 ? (
+          userData?.data?.specialization?.length === 0 ||
+          userData?.data?.availability.length === 0 ? (
           <div className={`flex flex-col tablet:w-full desktop:w-[70%] h-auto`}>
             <div
-              className={`flex flex-col justify-center items-center ${
-                isDark ? "text-white" : ""
-              } `}
+              className={`flex flex-col justify-center items-center ${isDark ? "text-white" : ""
+                } `}
             >
               <p
                 className={` flex justify-center items-center py-4 text-4xl font-[500] tablet:w-[60vh] desktop:w-[70vh]`}
@@ -191,9 +189,8 @@ const DocHome = () => {
             </div>
 
             <div
-              className={`flex justify-center items-center py-6 ${
-                currentStep === 4 ? "hidden" : ""
-              }`}
+              className={`flex justify-center items-center py-6 ${currentStep === 4 ? "hidden" : ""
+                }`}
             >
               <div className="w-[80%] ">
                 <div className="relative border-2  rounded-md flex  items-center h-4  justify-between ">
@@ -239,9 +236,8 @@ const DocHome = () => {
           </div>
         ) : (
           <div
-            className={`flex flex-col tablet:w-full desktop:w-[70%] h-auto mt-6 ${
-              isDark ? "text-white" : ""
-            }`}
+            className={`flex flex-col tablet:w-full desktop:w-[70%] h-auto mt-6 ${isDark ? "text-white" : ""
+              }`}
           >
             <Patients
               isDark={isDark}

@@ -59,6 +59,68 @@ interface coordinates {
   longitude: number;
 }
 
+interface patient {
+  role: string;
+  accessToken: string;
+  refreshToken: string;
+  userData: object;
+}
+
+interface doctor {
+  role: string;
+  accessToken: string;
+  refreshToken: string;
+  userData: object;
+  qualification: [];
+  availabilityExists: [];
+  specializationExists: [];
+}
+
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  qualification?: any[]; // Replace `any` with the actual type if available
+  availability?: {
+    day: string;
+    start: string;
+    end: string;
+  }[];
+  specialization?: any[]; // Replace `any` with the actual type if available
+  [key: string]: any; // For any additional dynamic fields
+}
+
+interface PatientState {
+  role: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  userData: UserData | null;
+}
+
+interface DoctorState {
+  role?: string | null;
+  accessToken?: string | null;
+  refreshToken?: string | null;
+  userData?: UserData | null;
+  qualificationExists?: boolean;
+  availabilityExists?: boolean;
+  specializationExists?: boolean;
+  currentStep?: number;
+  progressWidth?: number;
+  date?: string | null;
+  day?: string | null;
+  document?: {
+    day: string;
+    start: string;
+    end: string;
+  } | null;
+  totalMinutes?: number;
+  startTime?: string | null;
+  endTime?: string | null;
+  value?: boolean;
+}
+
 interface stateManagement {
   showPassword: boolean;
   termsAccepted: boolean;
@@ -78,6 +140,7 @@ interface stateManagement {
   credentials?: Credentials;
   hoveredField?: string;
   userData?: Object;
+
   proggresWidth: number | null;
   currentStep: number;
   totalSteps: number;
@@ -103,6 +166,12 @@ interface stateManagement {
   timings?: string[];
   geolocation?: any;
   coordinates?: coordinates;
+  hashedData?: string;
+  hashedFuntionName?: string;
+  doc_data?: object;
+  docisActive?: boolean;
+  patientData?: PatientState;
+  doctorData?: DoctorState;
 }
 
 //-----------------------------------interfaces----------------------------------------//
@@ -281,7 +350,6 @@ const initialState: stateManagement = {
     address: "",
     phone: null,
   },
-
   hoveredField: "",
   userData: {
     data: {
@@ -299,6 +367,7 @@ const initialState: stateManagement = {
       specialization: [{}],
     },
   } as UserData,
+
   proggresWidth: null,
   currentStep: 1,
   totalSteps: 4,
@@ -323,6 +392,33 @@ const initialState: stateManagement = {
   coordinates: {
     latitude: 0,
     longitude: 0,
+  },
+  hashedFuntionName: "",
+  hashedData: "",
+  docisActive: false,
+  patientData: {
+    role: null,
+    accessToken: null,
+    refreshToken: null,
+    userData: null,
+  },
+  doctorData: {
+    role: null,
+    accessToken: null,
+    refreshToken: null,
+    userData: null,
+    qualificationExists: false,
+    availabilityExists: false,
+    specializationExists: false,
+    currentStep: 0,
+    progressWidth: 0,
+    date: null,
+    day: null,
+    document: null,
+    totalMinutes: 0,
+    startTime: null,
+    endTime: null,
+    value: false,
   },
 };
 
@@ -389,6 +485,7 @@ const signup_login = createSlice({
           ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
       }
     },
+
     set_coordinates: (state, action) => {
       const { lat, lng } = action.payload;
 
@@ -396,6 +493,14 @@ const signup_login = createSlice({
         state.coordinates.latitude = lat;
         state.coordinates.longitude = lng;
       }
+    },
+
+    set_hashed_id: (state, action) => {
+      state.hashedData = action.payload;
+      console.log(JSON.parse(JSON.stringify(state.hashedData)));
+    },
+    set_doc_isActive: (state) => {
+      state.docisActive = !state.docisActive;
     },
   },
   //-------------------------------Builders-for-quaries-------------------------------//
@@ -422,19 +527,31 @@ const signup_login = createSlice({
 
       .addCase(login.fulfilled, (state, action) => {
         //patient
+        if (action.payload.data.data.role === "patient") {
+          state.patientData = {
+            role: action?.payload?.data?.data?.role,
+            accessToken: action?.payload?.data?.accessToken,
+            refreshToken: action.payload?.data?.refreshToken,
+            userData: action?.payload?.data
+          }
+        } else {
+          state.doctorData = {
+            role: action?.payload?.data?.data?.role,
+            accessToken: action?.payload?.data?.accessToken,
+            refreshToken: action.payload?.data?.refreshToken,
+            userData: action?.payload?.data
+          }
+        }
+
         if (action.payload?.data?.data?.role === "patient") {
           state.role = action?.payload?.data?.data?.role;
           state.pat_accessToken = action?.payload?.data?.accessToken;
           state.pat_refreshToken = action?.payload?.data?.refreshToken;
           state.userData = action?.payload?.data;
-        }
-
-        //doctor
-        if (action.payload?.data?.data?.role === "doctor") {
+        } else {
           state.role = action?.payload?.data?.data?.role;
           state.doc_accessToken = action?.payload?.data?.accessToken;
           state.doc_refreshToken = action?.payload?.data?.refreshToken;
-
           if (state.userData) {
             const incomingData = action.payload.data;
             Object.keys(state.userData).forEach((key) => {
@@ -496,6 +613,15 @@ const signup_login = createSlice({
           state.proggresWidth =
             ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
         }
+
+        console.log(
+          "pat_accessToken->",
+          JSON.parse(JSON.stringify(state.pat_accessToken))
+        );
+        console.log(
+          "pat_accessToken->",
+          JSON.parse(JSON.stringify(state.doc_refreshToken))
+        );
       })
 
       .addCase(login.rejected, (state) => {
@@ -567,6 +693,8 @@ export const {
   setHoverField,
   progressBar,
   set_coordinates,
+  set_hashed_id,
+  set_doc_isActive,
 } = signup_login.actions;
 
 export default signup_login.reducer;

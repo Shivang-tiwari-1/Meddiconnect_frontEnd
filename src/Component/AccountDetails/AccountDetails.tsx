@@ -12,14 +12,15 @@ import {
 import PageModel from "../../Utility/PageModel.Utils";
 import { getDoctorData } from "../../Redux/slices/Doctor.Redux";
 import PageModel2 from "../../Utility/PageModel/PageModel2.Utils";
-import { logout } from "../../Redux/slices/signup_login.";
+import { logout, set_hashed_id } from "../../Redux/slices/signup_login.";
 import { socket } from "../../Constants";
 import listners from "../../Sockets/listners";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 //*****************************Interface**********************************/
 
 const Patient = () => {
+  const location = useLocation();
   const navigate = useNavigate();
   //****************************APPSELECTOR*******************************//
   const { patientData, show, Appointmenthistory, show2, show3, show4 } =
@@ -46,7 +47,14 @@ const Patient = () => {
 
   useEffect(() => {
     if (role === "patient") {
-      dispatch(getUserData());
+      dispatch(getUserData()).then((action) => {
+        if (action.type === "patient/getUserData/fulfilled") {
+          const queryParams = new URLSearchParams(location.search);
+          dispatch(set_hashed_id("getUserData"));
+          queryParams.set("key", "getUserData");
+          navigate(`${location.pathname}?${queryParams.toString()}`);
+        }
+      });
     } else {
       dispatch(getDoctorData());
     }
