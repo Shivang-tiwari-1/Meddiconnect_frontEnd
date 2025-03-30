@@ -1,5 +1,7 @@
 // FilterBar.jsx
-import React from "react";
+import React, { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "../../../Redux/Store/Store";
+import { removeSelectedState, setSelectedState } from "../../../Redux/slices/StateChange.slice";
 
 const data = ["Apple", "Banana", "Orange", "Mango", "Pineapple", "Grapes"];
 
@@ -8,21 +10,19 @@ interface IData {
   text1: string;
   text2: string;
   text3: string;
-  onSelectState?: (currentState: string) => void;
-  onDeselectstate?: (currentState: string) => void;
   show?: boolean;
   mobileBool?: boolean;
   isDark?: boolean;
   doctor?: string[];
-  specializedIn?: object[];
+  specializedIn?: string[];
   addresss?: string[];
+
 }
 
-const FilterBar = (props: IData) => {
+const FilterBar: React.FC<IData> = React.memo((props) => {
+  const dispatch = useAppDispatch()
   const {
-    selectedStates = [],
-    onSelectState,
-    onDeselectstate,
+    selectedStates,
     text1,
     text2,
     text3,
@@ -30,20 +30,16 @@ const FilterBar = (props: IData) => {
     specializedIn,
     addresss,
   } = props;
+  const { doctors } = useAppSelector((state) => state.patient)
 
   const handleCheckboxChange = (currentState: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
-      const isChecked = event.target.checked;
-
-      if (isChecked) {
-        if (onSelectState) {
-          onSelectState(currentState);
-        }
-      } else {
-        if (onDeselectstate) {
-          onDeselectstate(currentState);
-        }
-      }
-    };
+    const isChecked = event.target.checked;
+    if (isChecked) {
+      dispatch(setSelectedState({ currentState, doctors }));
+    } else {
+      dispatch(removeSelectedState(currentState));
+    }
+  };
 
   return (
     <div className="desktop:w-[15vw] phone:w-[15vw] px-[1rem] dark:bg-lightBlack dark:text-textWhite h-[85vh]">
@@ -60,7 +56,7 @@ const FilterBar = (props: IData) => {
                 type="checkbox"
                 className="cursor-pointer"
                 onChange={handleCheckboxChange(item)}
-                checked={selectedStates.includes(item)}
+                checked={selectedStates?.includes(item)}
               />
               <div>{item}</div>
             </div>
@@ -77,7 +73,7 @@ const FilterBar = (props: IData) => {
                 type="checkbox"
                 className="cursor-pointer"
                 onChange={handleCheckboxChange(item)}
-                checked={selectedStates.includes(item)}
+                checked={selectedStates?.includes(item)}
               />
               <div>{item}</div>
             </div>
@@ -94,7 +90,7 @@ const FilterBar = (props: IData) => {
                 type="checkbox"
                 className="cursor-pointer"
                 onChange={handleCheckboxChange(item)}
-                checked={selectedStates.includes(item)}
+                checked={selectedStates?.includes(item)}
               />
               <div>{item}</div>
             </div>
@@ -103,6 +99,6 @@ const FilterBar = (props: IData) => {
       </div>
     </div>
   );
-};
+});
 
 export default FilterBar;

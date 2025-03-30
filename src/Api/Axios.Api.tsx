@@ -21,7 +21,19 @@ const axiosPrivatefile = axios.create({
 axiosPrivate.interceptors.request.use((config) => {
   if (config.headers) {
     const { doc_accessToken, pat_accessToken, role } = Store.getState().states;
+    console.log("form axio ---->", role)
     const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
+    console.log("accessToken--->", accessToken)
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  }
+  return config;
+});
+axiosPrivatefile.interceptors.request.use((config) => {
+  if (config.headers) {
+    const { doc_accessToken, pat_accessToken, role } = Store.getState().states;
+    console.log("form axio ---->", role)
+    const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
+    console.log("accessToken--->", accessToken)
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;

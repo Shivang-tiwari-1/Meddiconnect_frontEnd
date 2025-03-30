@@ -14,7 +14,14 @@ interface bookingState {
   id?: string;
   availability?: any;
   currentDate?: string;
+  address?: string;
+  distnace?: number;
+  phone?: number;
+  name?: string
+
 }
+
+
 const BookeAppointManually = (props: bookingState) => {
   const {
     show4,
@@ -25,8 +32,10 @@ const BookeAppointManually = (props: bookingState) => {
     id,
     availability,
     currentDate,
+    phone,
+    address,
+    name
   } = props;
-
   const dispatch = useAppDispatch();
 
   const { timings, days } = useAppSelector((state) => state.patient);
@@ -48,9 +57,9 @@ const BookeAppointManually = (props: bookingState) => {
 
         <div className="flex justify-start p-2 ">
           <div className=" w-full animate-slideDown">
-            <p className="text-3xl font-[500] ">Aptronix</p>
+            <p className="text-3xl font-[500] ">Dr {name ||  "unavailable"}</p>
             <p className="text-base font-apple">
-              Shop No. 23 & 24,Satara Park,Mumbai
+              {address || "unavailable"}
             </p>
           </div>
           <div className="flex justify-center items-center">
@@ -78,6 +87,8 @@ const BookeAppointManually = (props: bookingState) => {
               id={id}
               availability={availability}
               currentDate={currentDate}
+              name={name}
+              
             />
           )}
           <button className="flex justify-center items-center border-2 w-[30%] h-16 rounded-2xl hover:scale-110 ease-in-out duration-500">
@@ -122,7 +133,7 @@ const BookeAppointManually = (props: bookingState) => {
             <div className="w-[90%] h-[30vh] rounded-3xl bg-slate-200 flex flex-col justify-center">
               <div className="flex justify-start p-3 flex-col ">
                 <p className="text-[500] font-apple">Phone</p>
-                <p>9326977987</p>
+                <p>{phone ||  "unavailable"}</p>
               </div>
               <div className="flex justify-start p-3 flex-col ">
                 <p className="text-[500] font-apple">website</p>

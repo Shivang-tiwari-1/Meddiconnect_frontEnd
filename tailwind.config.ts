@@ -54,9 +54,14 @@ export default {
         "0%": { transform: "translateY(-100%)", opacity: "0" },
         "100%": { transform: "translateY(0)", opacity: "1" },
       },
+      fadeInScale: {
+        "0%": { transform: "scale(0.8)", opacity: "0" },
+        "100%": { transform: "scale(1)", opacity: "1" },
+      },
     },
     animation: {
       slideDown: "slideDown 1s ease-out",
+      fadeInScale: "fadeInScale 1s ease-out forwards",
     },
     scrollBehavior: ["responsive"],
   },

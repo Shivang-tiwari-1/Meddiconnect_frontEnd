@@ -35,15 +35,6 @@ const Patient = () => {
   //*************************** DISPATCH**********************************//
 
   //**************************HANDLEFUNCTION*****************************//
-  useEffect(() => {
-    if (socket.connected) {
-      console.log("inside ");
-      listners("liveMessage", dispatch);
-    }
-    return () => {
-      socket.off("liveMessage");
-    };
-  }, [socket]);
 
   useEffect(() => {
     if (role === "patient") {
@@ -58,7 +49,7 @@ const Patient = () => {
     } else {
       dispatch(getDoctorData());
     }
-  }, [dispatch]);
+  }, []);
 
   const handleToggleShow = () => {
     dispatch(toogleShow2());
@@ -80,13 +71,20 @@ const Patient = () => {
     dispatch(history());
     dispatch(toogleShow2());
   };
-
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const handleLogout = () => {
-    dispatch(logout()).then((action) => {
-      if (action.type === "user/logout/fulfilled") {
-        navigate("/home", { replace: true });
-      }
-    });
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      dispatch(logout()).then((action) => {
+        if (action.type === "user/logout/fulfilled") {
+          navigate("/home", { replace: true });
+        }
+      });
+    } catch (error) {
+      console.error("Logout failed", error);
+    }
+
   };
 
   const data = {};
@@ -106,9 +104,8 @@ const Patient = () => {
   //*******************************HTMLFILE*********************************//
   return (
     <div
-      className={`flex justify-center items-center w-full h-[85vh]  ${
-        isDark ? "bg-bgColorDarkBlack" : "bg-white"
-      } ${isDark ? "text-textWhite" : "text-black"}`}
+      className={`flex justify-center items-center w-full h-[85vh]  ${isDark ? "bg-bgColorDarkBlack" : "bg-white"
+        } ${isDark ? "text-textWhite" : "text-black"}`}
     >
       <div className=" border-2  w-[70%] desktop:w-[40%] h-[80vh] shadow-2xl rounded-2xl flex justify-center pl-3 ">
         <div className="flex justify-center  flex-col font-[300px] gap-4 w-[60%]">
@@ -162,11 +159,10 @@ const Patient = () => {
           </div>
 
           <div
-            className={`${
-              data?.data?.role === "doctor"
+            className={`${data?.data?.role === "doctor"
                 ? "hidden"
                 : "border-2 rounded-md w-[60] h-11 flex items-center shadow-lg"
-            }`}
+              }`}
           >
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">Appointment:</p>
@@ -181,11 +177,10 @@ const Patient = () => {
           </div>
 
           <div
-            className={` ${
-              data?.data?.role === "doctor"
+            className={` ${data?.data?.role === "doctor"
                 ? "hidden"
                 : "border-2 rounded-md w-[60] h-11 flex items-center shadow-lg"
-            }`}
+              }`}
           >
             <div className="flex w-full pl-4">
               <p className="flex-shrink-0 w-1/3 text-left">History:</p>

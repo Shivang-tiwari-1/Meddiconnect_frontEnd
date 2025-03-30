@@ -4,10 +4,7 @@ import { FaRegCalendarDays } from "react-icons/fa6";
 import { useAppDispatch } from "../../Redux/Store/Store";
 import {
   CollectedDay,
-  doctorPayload,
-  filterCollectionDay,
   setCollectedDay,
-  setCriteria,
   setDrop,
 } from "../../Redux/slices/Doctor.Redux";
 import { convertToLocalTime } from "../Function";
@@ -20,33 +17,27 @@ interface incomingData {
   handleMouseOut?: () => void;
   currentDay?: string;
   currentDate?: string;
-  collectDay?: [CollectedDay];
+  collectDay?: string | CollectedDay[] | undefined;
   drop?: boolean;
   submitAvailability?: () => void;
 }
 
 const SchedulePageModel: React.FC<incomingData> = ({
   isDark,
-  hoveredField,
   handleToggleShow4,
-  handleMouseOver,
-  handleMouseOut,
-  currentDate,
-  currentDay,
   collectDay = [],
   submitAvailability,
   drop,
 }) => {
-  const [show, setShow] = useState(false);
+  const [show] = useState(false);
   const dispatch = useAppDispatch();
   console.log(collectDay);
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div
-        className={`w-[70%] laptop:w-[50%] h-[53vh] rounded-lg p-4 relative ${
-          isDark ? "bg-bgColorDarkBlack" : "bg-white"
-        } ${isDark ? "text-white" : ""} mx-4`}
+        className={`w-[70%] laptop:w-[50%] h-[53vh] rounded-lg p-4 relative ${isDark ? "bg-bgColorDarkBlack" : "bg-white"
+          } ${isDark ? "text-white" : ""} mx-4`}
       >
         <div className="flex flex-col">
           <div className="flex items-center justify-center h-[5vh] animate-slideDown">
@@ -89,64 +80,61 @@ const SchedulePageModel: React.FC<incomingData> = ({
                     >
                       <p className="font-[500]">{item}</p>
                     </button>
-                    {collectDay[index]?.showInput && (
+                    {(collectDay[index] as CollectedDay)?.showInput && (
                       <>
                         <input
                           type="number"
                           placeholder="Enter patients"
-                          className={`border rounded-md p-1 mt-2 w-[90%] ${
-                            isDark ? "text-black" : ""
-                          } ${show ? "hidden" : ""}`}
+                          className={`border rounded-md p-1 mt-2 w-[90%] ${isDark ? "text-black" : ""
+                            } ${show ? "hidden" : ""}`}
                           onChange={(e) =>
                             dispatch(
                               setCollectedDay({
                                 index: index,
                                 HowManyPatients: parseInt(e.target.value),
-                                day: collectDay[index]?.day,
-                                start: collectDay[index]?.start,
-                                end: collectDay[index]?.end,
+                                day: (collectDay[index] as CollectedDay)?.day,
+                                start: (collectDay[index] as CollectedDay)?.start,
+                                end: (collectDay[index] as CollectedDay)?.end,
                               })
                             )
                           }
                         />
                       </>
                     )}
-                    {collectDay[index]?.showTimeStart && (
+                    {(collectDay[index] as CollectedDay)?.showTimeStart && (
                       <input
                         type="time"
                         placeholder="Enter patients"
-                        className={`border rounded-md p-1 mt-2 w-[90%] ${
-                          isDark ? "text-black" : ""
-                        } ${show ? "hidden" : ""}`}
+                        className={`border rounded-md p-1 mt-2 w-[90%] ${isDark ? "text-black" : ""
+                          } ${show ? "hidden" : ""}`}
                         onChange={(e) =>
                           dispatch(
                             setCollectedDay({
                               index: index,
                               HowManyPatients:
-                                collectDay[index].HowManyPatients,
-                              day: collectDay[index]?.day,
+                                (collectDay[index] as CollectedDay).HowManyPatients,
+                              day: (collectDay[index] as CollectedDay)?.day,
                               start: convertToLocalTime(e.target.value),
-                              end: collectDay[index]?.end,
+                              end: (collectDay[index] as CollectedDay)?.end,
                             })
                           )
                         }
                       />
                     )}
-                    {collectDay[index]?.showTimeEnd && (
+                    {(collectDay[index] as CollectedDay)?.showTimeEnd && (
                       <input
                         type="time"
                         placeholder="Enter patients"
-                        className={`border rounded-md p-1 mt-2 w-[90%] ${
-                          isDark ? "text-black" : ""
-                        } ${show ? "hidden" : ""}`}
+                        className={`border rounded-md p-1 mt-2 w-[90%] ${isDark ? "text-black" : ""
+                          } ${show ? "hidden" : ""}`}
                         onChange={(e) =>
                           dispatch(
                             setCollectedDay({
                               index: index,
                               HowManyPatients:
-                                collectDay[index].HowManyPatients,
-                              day: collectDay[index]?.day,
-                              start: collectDay[index]?.start,
+                                (collectDay[index] as CollectedDay).HowManyPatients,
+                              day: (collectDay[index] as CollectedDay)?.day,
+                              start: (collectDay[index] as CollectedDay)?.start,
                               end: convertToLocalTime(e.target.value),
                             })
                           )
@@ -184,17 +172,14 @@ const SchedulePageModel: React.FC<incomingData> = ({
                     <p>Start</p>
                     <p>End</p>
                   </div>
-                  {collectDay?.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-row justify-between mx-4"
-                    >
+                  {Array.isArray(collectDay) ? collectDay.map((item, index) => (
+                    <div key={index} className="flex flex-row justify-between mx-4">
                       <p>{item.HowManyPatients}</p>
                       <p>{item.day}</p>
                       <p>{item.start}</p>
                       <p>{item.end}</p>
                     </div>
-                  ))}
+                  )) : null}
                 </div>
               </div>
             </div>

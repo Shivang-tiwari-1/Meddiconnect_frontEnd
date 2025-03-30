@@ -4,7 +4,7 @@ import {
   convertToLocalTime,
   convertToLocalTime2,
 } from "../../Utility/Function";
-import { useNavigate } from "react-router-dom";
+import { json, useNavigate } from "react-router-dom";
 import { RootState } from "../Store/Store";
 import useJwtInterceptors from "../../Interceptors/useJwtInterceptors";
 import axios from "axios";
@@ -54,6 +54,7 @@ interface UserData {
   };
 }
 
+
 interface coordinates {
   latitude: number;
   longitude: number;
@@ -99,27 +100,34 @@ interface PatientState {
 }
 
 interface DoctorState {
-  role?: string | null;
-  accessToken?: string | null;
-  refreshToken?: string | null;
-  userData?: UserData | null;
-  qualificationExists?: boolean;
-  availabilityExists?: boolean;
-  specializationExists?: boolean;
-  currentStep?: number;
-  progressWidth?: number;
-  date?: string | null;
-  day?: string | null;
-  document?: {
-    day: string;
-    start: string;
-    end: string;
-  } | null;
-  totalMinutes?: number;
-  startTime?: string | null;
-  endTime?: string | null;
-  value?: boolean;
+  role: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
+  userData: UserData | null;
 }
+
+// interface DoctorState {
+//   role?: string | null;
+//   accessToken?: string | null;
+//   refreshToken?: string | null;
+//   userData?: UserData | null;
+//   qualificationExists?: boolean;
+//   availabilityExists?: boolean;
+//   specializationExists?: boolean;
+//   currentStep?: number;
+//   progressWidth?: number;
+//   date?: string | null;
+//   day?: string | null;
+//   document?: {
+//     day: string;
+//     start: string;
+//     end: string;
+//   } | null;
+//   totalMinutes?: number;
+//   startTime?: string | null;
+//   endTime?: string | null;
+//   value?: boolean;
+// }
 
 interface stateManagement {
   showPassword: boolean;
@@ -223,7 +231,6 @@ export const signup = createAsyncThunk(
     }
   }
 );
-
 export const login = createAsyncThunk(
   "user/login",
   async (
@@ -258,7 +265,6 @@ export const login = createAsyncThunk(
     }
   }
 );
-
 export const logout = createAsyncThunk(
   "user/logout",
   async (_, { dispatch, rejectWithValue }) => {
@@ -285,7 +291,6 @@ export const logout = createAsyncThunk(
     }
   }
 );
-
 export const refresh = createAsyncThunk(
   "user/refreshToken",
   async (_, { dispatch, rejectWithValue }) => {
@@ -302,7 +307,6 @@ export const refresh = createAsyncThunk(
     }
   }
 );
-
 export const getAddressFromCoordinates = createAsyncThunk(
   "user/geoCoordinate",
   async ({ latitude, longitude }: any, { rejectWithValue }) => {
@@ -367,7 +371,6 @@ const initialState: stateManagement = {
       specialization: [{}],
     },
   } as UserData,
-
   proggresWidth: null,
   currentStep: 1,
   totalSteps: 4,
@@ -407,19 +410,7 @@ const initialState: stateManagement = {
     accessToken: null,
     refreshToken: null,
     userData: null,
-    qualificationExists: false,
-    availabilityExists: false,
-    specializationExists: false,
-    currentStep: 0,
-    progressWidth: 0,
-    date: null,
-    day: null,
-    document: null,
-    totalMinutes: 0,
-    startTime: null,
-    endTime: null,
-    value: false,
-  },
+  }
 };
 
 const signup_login = createSlice({
@@ -479,7 +470,9 @@ const signup_login = createSlice({
     },
 
     progressBar: (state, action) => {
+
       if ((state.currentStep, state.totalSteps)) {
+        console.log("here in the redux")
         state.currentStep += action.payload;
         state.proggresWidth =
           ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
@@ -510,38 +503,42 @@ const signup_login = createSlice({
         state.loading = true;
         state.error = null;
       })
-
       .addCase(signup.fulfilled, (state, action) => {
         state.loading = false;
       })
-
       .addCase(signup.rejected, (state, action) => {
         state.loading = false;
         state.error = null;
       })
-
       .addCase(login.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(login.fulfilled, (state, action) => {
         //patient
         if (action.payload.data.data.role === "patient") {
-          state.patientData = {
-            role: action?.payload?.data?.data?.role,
-            accessToken: action?.payload?.data?.accessToken,
-            refreshToken: action.payload?.data?.refreshToken,
-            userData: action?.payload?.data
-          }
-        } else {
-          state.doctorData = {
-            role: action?.payload?.data?.data?.role,
-            accessToken: action?.payload?.data?.accessToken,
-            refreshToken: action.payload?.data?.refreshToken,
-            userData: action?.payload?.data
-          }
+          const patientdata = {
+            ...state.patientData, // Keep existing patient data
+            role: action.payload.data.data.role,
+            accessToken: action.payload.data.accessToken,
+            refreshToken: action.payload.data.refreshToken,
+            userData: action.payload.data,
+          };
+          state.patientData = patientdata
+        } else if (action.payload.data.data.role === "doctor") {
+          const daoctodata = {
+            ...state.doctorData, // Keep existing doctor data
+            role: action.payload.data.data.role,
+            accessToken: action.payload.data.accessToken,
+            refreshToken: action.payload.data.refreshToken,
+            userData: action.payload.data,
+          };
+          state.doctorData = daoctodata
         }
+
+
+        console.log("doctor-data->", JSON.parse(JSON.stringify(state.doctorData)))
+        console.log("patient-data->", JSON.parse(JSON.stringify(state.patientData)))
 
         if (action.payload?.data?.data?.role === "patient") {
           state.role = action?.payload?.data?.data?.role;
@@ -564,7 +561,7 @@ const signup_login = createSlice({
           if (state?.userData?.data?.qualification?.length > 0) {
             state.qualificationExists = true;
           }
-          if (state?.userData?.data?.availability?.length > 0) {
+          if ((state as any).userData?.data?.availability?.length > 0) {
             state.availabilityExists = true;
           }
           if (state?.userData?.data?.specialization?.length > 0) {
@@ -623,12 +620,10 @@ const signup_login = createSlice({
           JSON.parse(JSON.stringify(state.doc_refreshToken))
         );
       })
-
       .addCase(login.rejected, (state) => {
         state.loading = true;
         state.error = null;
       })
-
       .addCase(logout.fulfilled, (state) => {
         if (state?.role === "patient") {
           state.pat_accessToken = null;
@@ -639,26 +634,21 @@ const signup_login = createSlice({
         }
         state.loading = false;
       })
-
       .addCase(logout.rejected, (state) => {
         state.loading = false;
       })
-
       .addCase(logout.pending, (state) => {
         state.loading = true;
       })
-
       .addCase(refresh.pending, (state) => {
         state.loading = true;
       })
-
       .addCase(refresh?.fulfilled, (state, action) => {
         console.log(action);
         const { accessToken, refreshToken } = action?.payload;
         state.accessToken = accessToken;
         state.refreshToken = refreshToken;
       })
-
       .addCase(refresh?.rejected, (state) => {
         state.loading = false;
       })

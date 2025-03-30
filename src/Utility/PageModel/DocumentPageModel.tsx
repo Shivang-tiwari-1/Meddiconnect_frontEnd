@@ -1,12 +1,14 @@
 import React, { useState } from "react";
 import { IoArrowBackCircle } from "react-icons/io5";
-import { useAppDispatch } from "../../Redux/Store/Store";
+import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import { setDocDocuments } from "../../Redux/slices/Doctor.Redux";
 import {
   toggleAlertCheck,
   toggleStatusCheck,
 } from "../../Redux/slices/signup_login.";
 import { useNavigate } from "react-router-dom";
+import { updateProgressBar } from "../../Sockets/Initialize_socket";
+import { current_doctor_schedul } from "../../Redux/slices/Patient.Redux";
 
 interface stateChaneg {
   isDark?: boolean;
@@ -19,14 +21,15 @@ interface stateChaneg {
 
 const DocumentPageModel = (props: stateChaneg) => {
   const {
-    show2,
     isDark,
     handleToggleShow2,
     handleMouseOut,
     handleMouseOver,
     hoveredField,
   } = props;
-  const navigate = useNavigate();
+  const {
+    userData
+  } = useAppSelector((state) => state.states);
   const dispatch = useAppDispatch();
   const [documents, setDocuments] = useState<File[]>([]);
 
@@ -36,15 +39,19 @@ const DocumentPageModel = (props: stateChaneg) => {
       setDocuments((prevDocuments) => [...prevDocuments, files[0]]);
     }
   };
+
+
+
   return (
     <form
       className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
       onSubmit={(e) => {
-        if (documents.length < 3) {
+        if (documents.length < 2) {
           dispatch(toggleAlertCheck("all fields are required"));
           dispatch(toggleStatusCheck(400));
         }
         e.preventDefault();
+        updateProgressBar((userData as any)?.data?._id)
         dispatch(
           setDocDocuments({
             MedicalRegistrationCertificate: documents[0],
@@ -55,9 +62,8 @@ const DocumentPageModel = (props: stateChaneg) => {
       }}
     >
       <div
-        className={`w-[70%] laptop:w-[50%] h-[50vh] rounded-lg p-4 relative ${
-          isDark ? "bg-bgColorDarkBlack" : "bg-white"
-        } ${isDark ? "text-white" : ""}`}
+        className={`w-[70%] laptop:w-[50%] h-[50vh] rounded-lg p-4 relative ${isDark ? "bg-bgColorDarkBlack" : "bg-white"
+          } ${isDark ? "text-white" : ""}`}
       >
         <div className="flex flex-col py-6">
           <div className="flex items-center justify-center h-[5vh] animate-slideDown">
@@ -66,9 +72,8 @@ const DocumentPageModel = (props: stateChaneg) => {
 
           {/* Medical Registration Certificate */}
           <div
-            className={`py-[2rem] ${
-              isDark ? "text-white" : ""
-            } flex justify-around items-center border-2 rounded-xl relative`}
+            className={`py-[2rem] ${isDark ? "text-white" : ""
+              } flex justify-around items-center border-2 rounded-xl relative`}
             onMouseOver={() =>
               handleMouseOver?.("MedicalRegistrationCertificate")
             }
@@ -98,9 +103,8 @@ const DocumentPageModel = (props: stateChaneg) => {
 
           {/* MBBS Degree */}
           <div
-            className={`py-[2rem] ${
-              isDark ? "text-white" : ""
-            } flex justify-around items-center border-2 rounded-xl relative`}
+            className={`py-[2rem] ${isDark ? "text-white" : ""
+              } flex justify-around items-center border-2 rounded-xl relative`}
             onMouseOver={() => handleMouseOver?.("MBBSDegree")}
             onMouseOut={handleMouseOut}
           >
@@ -125,9 +129,8 @@ const DocumentPageModel = (props: stateChaneg) => {
 
           {/* State Medical Council Registration */}
           <div
-            className={`py-[2rem] ${
-              isDark ? "text-white" : ""
-            } flex justify-around items-center border-2 rounded-xl relative`}
+            className={`py-[2rem] ${isDark ? "text-white" : ""
+              } flex justify-around items-center border-2 rounded-xl relative`}
             onMouseOver={() =>
               handleMouseOver?.("StateMedicalCouncilRegistration")
             }

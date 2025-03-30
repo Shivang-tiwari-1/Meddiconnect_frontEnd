@@ -1,9 +1,9 @@
 // UserDate.jsx
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import FilterBar from "./FilterBar";
 import { IoClose } from "react-icons/io5";
 import { useAppDispatch, useAppSelector } from "../../../Redux/Store/Store";
-import { toogleGridChange } from "../../../Redux/slices/StateChange.slice";
+import { clearFilter, removeSelectedState, toogleGridChange } from "../../../Redux/slices/StateChange.slice";
 import { BsGrid } from "react-icons/bs";
 import { TfiViewList } from "react-icons/tfi";
 import { CiUndo } from "react-icons/ci";
@@ -12,33 +12,25 @@ import {
   fetchAllDoctors,
   set_disable,
   setOpenDoctorId,
-  sideBarContent,
-  toogleShow,
   toogleShow2,
   toogleShow4,
 } from "../../../Redux/slices/Patient.Redux";
 import Doctors from "./Doctors";
 import { globalResizeFunction } from "../../../Utility/resizer.Utils";
 import {
-  set_hashed_id,
   setHoverField,
 } from "../../../Redux/slices/signup_login.";
 
 const FindDoctor = () => {
   const dispatch = useAppDispatch();
-  const [selectedState, setSelectedState] = useState<string[]>([]);
-
-  //--------------------------------------------App-selectors---------------------------------//
+  const { selectedState } = useAppSelector(state => state.stateChange)
 
   const {
     tabletBool,
     mobileBool,
     hoveredField,
     timings,
-    hashedData,
-    docisActive,
-    doctorData,
-    patientData,
+    doctorData
   } = useAppSelector((state) => state.states);
   const {
     show,
@@ -51,56 +43,33 @@ const FindDoctor = () => {
     numbersOfDoctors,
     disable,
   } = useAppSelector((state) => state.patient);
-  const { isDark } = useAppSelector((state) => state.stateChange);
+  const { isDark, filterdoctors = [] } = useAppSelector((state) => state.stateChange);
   const { gridView } = useAppSelector((state) => state.stateChange);
-  const { doctors } = useAppSelector((state) => state.patient);
+  const { doctors } = useAppSelector((state) => state.patient)
+  const { active_doctors } = useAppSelector(state => state.doctor)
 
-  //--------------------------------------------functions---------------------------------//
-  const handleToggleShow = (doctorId: string | null) => {
+  useEffect(() => {
+    dispatch(fetchAllDoctors())
+  }, [dispatch]);
+  const handleToggleShow = useCallback((doctorId: string | null) => {
     if (openUserId === doctorId) {
       dispatch(setOpenDoctorId(null));
     } else {
-      const fetch_doc = doctors?.find((index) => {
-        return index?._id === doctorId;
-      });
-
+      const fetch_doc = doctors?.find((index) => index?._id === doctorId);
       if (fetch_doc?.availability.length > 0) {
-        console.log(doctorId);
         dispatch(setOpenDoctorId(doctorId));
       }
     }
-  };
-
-  const handleToggleShow4 = () => {
+  }, [openUserId, doctors, dispatch]);
+  const handleToggleShow4 = useCallback(() => {
     dispatch(toogleShow4());
-  };
-
-  useEffect(() => {
-    dispatch(fetchAllDoctors()).then((action) => {});
-  }, [dispatch]);
-
-  const clearFilter = () => {
-    setSelectedState([]);
-  };
-
-  const handleSelectState = (currentState: string) => {
-    setSelectedState((prevState: string[]) => [...prevState, currentState]);
-  };
-
-  const handleDeselct = (currentState: string) => {
-    setSelectedState((prevCriteria: string[]) =>
-      prevCriteria.filter((item) => item !== currentState)
-    );
-  };
-
-  const handleMouseOver = (fieldName: string) => {
+  }, [show4]);
+  const handleMouseOver = useCallback((fieldName: string) => {
     dispatch(setHoverField(fieldName));
-  };
-
-  const handleMouseOut = () => {
+  }, [hoveredField]);
+  const handleMouseOut = useCallback(() => {
     dispatch(setHoverField(""));
-  };
-
+  }, [hoveredField]);
   const data = {
     locality: [
       "Downtown",
@@ -136,22 +105,21 @@ const FindDoctor = () => {
     text2: "speacilist",
     text3: "nearby",
   };
-
-  const isDisabled = (id: any) => {
+  const isDisabled = useCallback((id: any) => {
     dispatch(set_disable(id));
-  };
-
-  const handleToggleShow2 = () => {
+  }, [disable]);
+  const handleToggleShow2 = useCallback(() => {
     dispatch(toogleShow2());
-  };
+  }, [show2]);
+
+console.log(active_doctors)
+
 
   return (
     <div className={`flex  ${isDark ? "dark" : ""} h-[85vh]`}>
       <div className="dark:bg-bgColorDarkBlack  bg:text-textWhite">
         <FilterBar
           selectedStates={selectedState}
-          onSelectState={handleSelectState}
-          onDeselectstate={handleDeselct}
           text1={data?.text1}
           text2={data?.text2}
           text3={data?.text3}
@@ -173,7 +141,7 @@ const FindDoctor = () => {
             </div>
 
             <div className="flex gap-4 ">
-              {selectedState.map((item: string, index: number) => (
+              {selectedState?.map((item: string, index: number) => (
                 <div
                   key={index}
                   className="flex items-center gap-4 bg-primaryRed px-4 rounded-xl text-textWhite"
@@ -181,7 +149,7 @@ const FindDoctor = () => {
                   {item}
                   <div
                     className="cursor-pointer bg-bl"
-                    onClick={() => handleDeselct(item)}
+                    onClick={() => dispatch(removeSelectedState(item))}
                   >
                     <IoClose />
                   </div>
@@ -211,7 +179,7 @@ const FindDoctor = () => {
               )}
               <div
                 className="flex items-center gap-1 cursor-pointer px-2 py-2 hover:scale-105 transition-transform duration-300"
-                onClick={() => clearFilter()}
+                onClick={() => dispatch(clearFilter())}
               >
                 Clear Filter <CiUndo />
               </div>
@@ -219,44 +187,79 @@ const FindDoctor = () => {
           </div>
           {/* mapping the Doctors*/}
           {!gridView ? (
-            <div
-              className={`grid-cols-2 desktop:grid-cols-2 grid gap-4 py-4 px-4  `}
-            >
-              {doctors?.map((doctor) => (
-                <Doctors
-                  key={doctor?._id}
-                  isActive={doctor?.isActive}
-                  name={doctor?.name}
-                  availability={doctor?.availability}
-                  profileImage={doctor?.profileImage}
-                  address={doctor?.address}
-                  history={doctor?.history}
-                  role={doctor?.role}
-                  specializedIn={doctor?.specialization}
-                  show={show}
-                  tabletBool={tabletBool}
-                  handleToggleShow={handleToggleShow}
-                  mobileBool={mobileBool}
-                  isDark={isDark}
-                  id={doctor?._id}
-                  openUserId={openUserId}
-                  show4={show4}
-                  Max={doctor?.Max}
-                  BookAppointment={BookAppointMent}
-                  globalResizeFunction={globalResizeFunction}
-                  handleMouseOver={handleMouseOver}
-                  handleMouseOut={handleMouseOut}
-                  hoveredField={hoveredField}
-                  disable={disable}
-                  isDisabled={isDisabled}
-                  handleToggleShow4={handleToggleShow4}
-                  handleToggleShow2={handleToggleShow2}
-                  show2={show2}
-                  timings={timings}
-                  docisActive={doctorData?.userData?.data?.isActive}
-                />
-              ))}
+            <div className="grid-cols-2 desktop:grid-cols-2 grid gap-4 py-4 px-4">
+              {selectedState?.length === 0
+                ? doctors?.map((doctor) => (
+                  <Doctors
+                    key={doctor?._id}
+                    isActive={active_doctors?.some((data) => (data as any).userId === (doctor as any)._id.toString() && (data as any).online)}
+                    name={doctor?.name}
+                    availability={doctor?.availability}
+                    profileImage={doctor?.profileImage}
+                    address={doctor?.address}
+                    history={doctor?.history}
+                    role={doctor?.role}
+                    specializedIn={doctor?.specialization}
+                    Max={doctor?.Max}
+                    docisActive={doctorData?.userData?.data?.isActive}
+                    id={doctor?._id}
+                    show={show}
+                    tabletBool={tabletBool}
+                    handleToggleShow={handleToggleShow}
+                    mobileBool={mobileBool}
+                    isDark={isDark}
+                    openUserId={openUserId}
+                    show4={show4}
+                    BookAppointment={BookAppointMent}
+                    globalResizeFunction={globalResizeFunction}
+                    handleMouseOver={handleMouseOver}
+                    handleMouseOut={handleMouseOut}
+                    hoveredField={hoveredField}
+                    disable={disable}
+                    isDisabled={isDisabled}
+                    handleToggleShow4={handleToggleShow4}
+                    handleToggleShow2={handleToggleShow2}
+                    show2={show2}
+                    timings={timings}
+                  />
+                ))
+                : filterdoctors?.map((doctor) => (
+                  <Doctors
+                    key={doctor?._id}
+                    isActive={active_doctors?.some((data) => (data as any).userId === (doctor as any)._id.toString() && (data as any).online)}
+                    name={doctor?.name}
+                    availability={doctor?.availability}
+                    profileImage={doctor?.profileImage}
+                    address={doctor?.address}
+                    history={doctor?.history}
+                    role={doctor?.role}
+                    specializedIn={doctor?.specialization}
+                    Max={doctor?.Max}
+                    docisActive={doctorData?.userData?.data?.isActive}
+                    id={doctor?._id}
+                    show={show}
+                    tabletBool={tabletBool}
+                    handleToggleShow={handleToggleShow}
+                    mobileBool={mobileBool}
+                    isDark={isDark}
+                    openUserId={openUserId}
+                    show4={show4}
+                    BookAppointment={BookAppointMent}
+                    globalResizeFunction={globalResizeFunction}
+                    handleMouseOver={handleMouseOver}
+                    handleMouseOut={handleMouseOut}
+                    hoveredField={hoveredField}
+                    disable={disable}
+                    isDisabled={isDisabled}
+                    handleToggleShow4={handleToggleShow4}
+                    handleToggleShow2={handleToggleShow2}
+                    show2={show2}
+                    timings={timings}
+                  />
+                ))
+              }
             </div>
+
           ) : (
             <div
               className={`grid-row desktop:grid-cols-3 mobile:grid-rows-1 grid gap-4 py-4 px-4  `}
@@ -264,6 +267,7 @@ const FindDoctor = () => {
               {doctors?.map((doctor) => (
                 <Doctors
                   key={doctor?._id}
+                  isActive={active_doctors?.some((data) => (data as any).userId === (doctor as any)._id.toString() && (data as any).online)}
                   name={doctor?.name}
                   availability={doctor?.availability}
                   profileImage={doctor?.profileImage}

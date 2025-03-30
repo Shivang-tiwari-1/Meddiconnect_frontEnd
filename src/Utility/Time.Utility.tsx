@@ -4,10 +4,13 @@ interface ElapsedClockProps {
   startTime: string;
 }
 
-const Time = ({ startTime }: ElapsedClockProps) => {
+const Time: React.FC<ElapsedClockProps> = React.memo((props) => {
+
+
+  const { startTime } = props
 
   const [elapsedTime, setElapsedTime] = useState("");
-  
+
   useEffect(() => {
     const [time, period] = startTime.trim().split(" ");
     if (!time || !period || !["am", "pm"].includes(period.toLowerCase())) {
@@ -65,6 +68,6 @@ const Time = ({ startTime }: ElapsedClockProps) => {
       <p className="font-[500] text-9xl text-shadow-md">{elapsedTime}</p>
     </div>
   );
-};
+});
 
 export default Time;

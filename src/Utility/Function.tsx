@@ -1,4 +1,7 @@
+import moment from "moment";
+
 export function convertToLocalTime(time: string): string | null {
+
   const timeParts = time.split(":").map(Number);
   const [hours, minutes, seconds] = timeParts;
   if (
@@ -21,11 +24,10 @@ export function convertToLocalTime(time: string): string | null {
 
   const formattedTime = `${String(adjustedHours).padStart(2, "0")}:${String(
     date.getMinutes()
-  ).padStart(2, "0")}${
-    timeParts.length === 3
-      ? `:${String(date.getSeconds()).padStart(2, "0")}`
-      : ""
-  } ${isPM ? "PM" : "AM"}`;
+  ).padStart(2, "0")}${timeParts.length === 3
+    ? `:${String(date.getSeconds()).padStart(2, "0")}`
+    : ""
+    } ${isPM ? "PM" : "AM"}`;
   return formattedTime;
 }
 
@@ -56,3 +58,26 @@ export function convertToLocalTime2(time: string): string | null {
 
   return localizedTime;
 }
+export const get_date = () => {
+  const date = moment(new Date());
+
+}
+
+export const createTime = (time) => {
+  if (time === null || time === undefined) {
+    console.log("data needed")
+  } else {
+    const [hours, minutes, seconds] = time.split(":").map(Number);
+    const date = new Date();
+    date.setHours(hours, minutes, seconds, 0);
+    return date;
+  }
+
+};
+
+
+export const currentTime = () => {
+  const now = new Date();
+  const currentTime = now.toISOString();
+  return currentTime;
+};

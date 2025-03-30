@@ -9,6 +9,7 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import socketSliceReducer from "../slices/socketRedux";
 import { socket } from "../../Constants";
 import { socketMiddleware } from "../Middleware/SocketMiddleware";
+import { PublishChannels } from "../Middleware/redisPublishe/publishChannels";
 const Store = configureStore({
   reducer: {
     stateChange: StateChangeSliceReducer,
@@ -19,7 +20,8 @@ const Store = configureStore({
     socket: socketSliceReducer,
     MessageSlice: MessageSliceReducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware(socket))
+  // middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(socketMiddleware(socket)),
+  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(PublishChannels(socket))
 });
 
 export type RootState = ReturnType<typeof Store.getState>;

@@ -16,7 +16,7 @@ const listners = (listner: any, dispatch: any) => {
     }
 
     if (listner === "listen_to_message") {
-      socket.emit('listen_to_message', (data: any) => {
+      socket.on('listen_to_message', (data: any) => {
         console.log("from---->",data)
         dispatch(SetText(data.text))
         dispatch(setRecords({ text: data.text, role: data.role, user_Role: data.user_Role }))

@@ -20,6 +20,7 @@ import DocHome from "./Component/Doctor/DocHome";
 import Notify from "./Component/UtilityComponents/Notify";
 import All_patients from "./Component/Doctor/DocHomeComponents/All_patients/All_patients";
 import FinalChatroom from "./Component/ChatRoom/FinalChatroom";
+import MessageNotify from "./Component/UtilityComponents/MessageNotify";
 
 function App() {
   const location = useLocation();
@@ -28,6 +29,7 @@ function App() {
       {location.pathname !== "" && <Navbar />}
       <Alert />
       <Notify />
+      <MessageNotify />
       <Routes>
         <Route path="/" element={<Layout />}>
           {/* Public Routes */}
@@ -42,6 +44,7 @@ function App() {
             <Route path="/DocHome" element={<DocHome />} />
             <Route path="/prescripe" element={<Prescripemedicine />} />
             <Route path="/All_patients" element={<All_patients />} />
+            <Route path="/FinalChatroom" element={<FinalChatroom />} />
           </Route>
           {/* Patient Routes */}
           <Route element={<RequiredAuthPatinet allowedRoles={["patient"]} />}>

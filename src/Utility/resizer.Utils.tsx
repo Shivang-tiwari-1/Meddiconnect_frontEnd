@@ -10,7 +10,6 @@ export const globalResizeFunction = function () {
   const dispatch = useAppDispatch();
   useEffect(() => {
     const handleResize = () => {
-      console.log("mobile");
       if (window.innerWidth <= 500) {
         dispatch(toogleMobileCheck(true));
       } else {
@@ -18,7 +17,6 @@ export const globalResizeFunction = function () {
       }
 
       if (window.innerWidth > 500) {
-        console.log("tablet");
         dispatch(toggleTabletCheck(true));
       } else {
         dispatch(toggleTabletCheck(false));
@@ -28,5 +26,5 @@ export const globalResizeFunction = function () {
     window.addEventListener("resize", handleResize);
 
     return () => window.removeEventListener("resize", handleResize);
-  }, [dispatch]);
+  }, []);
 };

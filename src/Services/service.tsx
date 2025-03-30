@@ -2,13 +2,13 @@ import {
   getAddressFromCoordinates,
   set_coordinates,
 } from "../Redux/slices/signup_login.";
+import moment from "moment";
 
 export const convertAMPMToISO = (time) => {
   const [hour, minute, second] = time.slice(0, 8).split(":").map(Number);
-  const isPM = time.includes("PM");
+  const isPM = time.includes("pm") || time.includes("PM");
   const finalHour =
     isPM && hour !== 12 ? hour + 12 : hour === 12 && !isPM ? 0 : hour;
-
   const now = new Date();
   return new Date(
     now.getFullYear(),
@@ -19,12 +19,12 @@ export const convertAMPMToISO = (time) => {
     second || 0
   );
 };
-
 export const generateTimeIntervals = (
   start: string,
   totalMinutes: number,
   intervalMinutes: number
 ) => {
+
   let interval: string[] = [];
   let current = new Date(start);
   for (let i = 0; i < totalMinutes / intervalMinutes; i++) {
@@ -33,7 +33,6 @@ export const generateTimeIntervals = (
   }
   return interval;
 };
-
 export const convertTo12HourFormat = (date_array: string) => {
   const [hours, minutes] = date_array.split(":");
   let period = "AM";
@@ -48,16 +47,13 @@ export const convertTo12HourFormat = (date_array: string) => {
   }
   return `${hour}:${minutes} ${period}`;
 };
-
 export const hours = (start, end) => {
-  console.log(start, end);
   const starting = convertAMPMToISO(start);
   const ending = convertAMPMToISO(end);
   const differenceInMilliseconds = ending - starting;
   const differenceInHours = differenceInMilliseconds / (1000 * 60 * 60);
   return differenceInHours;
 };
-
 export const get_Current_location = async (geolocation_Object, dispatch) => {
   if (geolocation_Object) {
     geolocation_Object.getCurrentPosition(async (position) => {
@@ -72,9 +68,7 @@ export const get_Current_location = async (geolocation_Object, dispatch) => {
     });
   }
 };
-
 const toRadians = (degrees) => degrees * (Math.PI / 180);
-
 export const haversineDistance = (lat1, lat2, lon1, lon2) => {
   const R = 6371;
   const φ1 = toRadians(lat1);
@@ -90,3 +84,10 @@ export const haversineDistance = (lat1, lat2, lon1, lon2) => {
   const distance = R * c;
   return distance;
 };
+export const get_date = () => {
+  const now = new Date()
+  console.log(now)
+  const date = moment(now.toDateString());
+  console.log(date)
+  console.log(date.day("ddd"))
+}

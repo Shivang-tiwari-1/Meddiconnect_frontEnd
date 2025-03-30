@@ -4,6 +4,7 @@ import {
   set_Live_Message,
   set_notification,
 } from "../../Redux/slices/socketRedux";
+import { IoArrowBackCircle } from "react-icons/io5";
 
 const Notify = () => {
   const { livemessage, notification } = useAppSelector((state) => state.socket);
@@ -37,8 +38,17 @@ const Notify = () => {
           }}
           className={`border-2 flex justify-center items-center outline-none w-[40%] w-max-auto laptop:w-[15%] h-[10vh] rounded-xl`}
         >
-          <p className={` text-black text-md font-bold`}>{livemessage}</p>
+          <div className="w-full h-full flex justify-center items-center">
+            <p className={` text-black text-md font-bold`}>{livemessage}</p>
+          </div>
+          <div className="h-full flex justify-center items-center text-stone-950" >
+            <button onClick={() => dispatch(set_notification(false))}>
+              <IoArrowBackCircle size={30} />
+            </button>
+          </div>
         </div>
+
+
       )}
     </>
   );

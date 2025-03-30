@@ -17,7 +17,7 @@ import { IoMdLocate } from "react-icons/io";
 import { get_Current_location } from "../../Services/service";
 import Loader from "../../Utility/loader/Loader";
 
-const SignUp = () => {
+const SignUp =React.memo( () => {
   const navigate = useNavigate();
 
   //**************************APPSELECTOR****************/
@@ -52,7 +52,6 @@ const SignUp = () => {
       );
     }
   };
-
   const handleRolegenderChange = (e: any) => {
     const { value } = e.target;
     if (value === "doctor" || value === "patient") {
@@ -62,15 +61,12 @@ const SignUp = () => {
     }
     dispatch(tooglePatientCheck(value));
   };
-
   const handleCheckboxChange = () => {
     dispatch(toogleTermAcdepted());
   };
-
   const handleConfirmPasswordState = (e: any) => {
     dispatch(toogleCongirmPassword(e.target.value));
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (confirmPassword !== credentials?.password) {
@@ -83,11 +79,14 @@ const SignUp = () => {
     }
 
     const formData = new FormData();
+
     Object.entries(credentials).forEach(([key, value]) => {
       if (value) formData.append(key, value as string);
     });
 
-    if (profileImage) formData.append("profileImage", profileImage);
+    if (profileImage) { formData.append("profileImage", profileImage); } else {
+      throw new Error('no profile imahe')
+    }
     formData.append("latitude", coordinates?.latitude);
     formData.append("longitude", coordinates?.longitude);
     dispatch(signup(formData)).then((action) => {
@@ -95,7 +94,7 @@ const SignUp = () => {
         navigate("/login", { replace: true });
       }
     });
-  
+
     dispatch(
       setCredentials({
         field: "email",
@@ -138,22 +137,21 @@ const SignUp = () => {
         value: "",
       })
     );
+
     dispatch(toogleCongirmPassword(""));
   };
-
   const handleMouseOver = (fieldNam: string) => {
     dispatch(setHoverField(fieldNam));
   };
-
   const handleMouseOut = () => {
     dispatch(setHoverField(""));
   };
 
+
   return (
     <div
-      className={`flex w-[100%] h-[${
-        mobile ? "100vh" : "85vh"
-      }] justify-center items-center ${isDark ? "bg-lightBlack" : "bg-white"}`}
+      className={`flex w-[100%] h-[${mobile ? "100vh" : "85vh"
+        }] justify-center items-center ${isDark ? "bg-lightBlack" : "bg-white"}`}
     >
       {loading ? (
         <Loader />
@@ -213,9 +211,8 @@ const SignUp = () => {
                       accept="image/*"
                       onMouseOver={() => handleMouseOver("profileImage")}
                       onMouseOut={handleMouseOut}
-                      className={`border border-primaryGrey rounded-[10px] h-[2.5rem] w-full placeholder-gray-500 outline-none shadow-lg ${
-                        isDark ? "bg-white" : ""
-                      }`}
+                      className={`border border-primaryGrey rounded-[10px] h-[2.5rem] w-full placeholder-gray-500 outline-none shadow-lg ${isDark ? "bg-white" : ""
+                        }`}
                       onChange={handleInputChange}
                     />
                     {hoveredField === "profileImage" && (
@@ -234,6 +231,7 @@ const SignUp = () => {
                       value={credentials?.name}
                       name="name"
                       id="name"
+                      required
                       className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg font-[500
                     ]"
                       onChange={handleInputChange}
@@ -253,6 +251,7 @@ const SignUp = () => {
                       value={credentials?.email}
                       name="email"
                       id="email"
+                      required
                       className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg"
                       onChange={handleInputChange}
                       onMouseOver={() => handleMouseOver("Email")}
@@ -273,6 +272,7 @@ const SignUp = () => {
                     value={credentials?.address}
                     id="address"
                     placeholder="Address"
+                    required
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
                     onChange={handleInputChange}
                     onMouseOver={() => handleMouseOver("Address")}
@@ -312,6 +312,7 @@ const SignUp = () => {
                       value={credentials?.password}
                       id="password"
                       placeholder="Password"
+                      required
                       className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
                       onChange={handleInputChange}
                       onMouseOver={() => handleMouseOver("Password")}
@@ -331,8 +332,8 @@ const SignUp = () => {
                         {credentials?.password?.length === 0
                           ? " "
                           : showPassword
-                          ? "Hide"
-                          : "Show"}
+                            ? "Hide"
+                            : "Show"}
                       </button>
                     </span>
                   </div>
@@ -344,6 +345,7 @@ const SignUp = () => {
                     name="phone"
                     value={credentials?.phone}
                     id="phone"
+                    required
                     placeholder="Phone"
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full pr-10 outline-none shadow-lg"
                     onChange={handleInputChange}
@@ -364,6 +366,7 @@ const SignUp = () => {
                     value={confirmPassword}
                     id="confirmPassword"
                     placeholder="Confirm Password"
+                    required
                     className="border border-primaryGrey rounded-[10px] h-[2.5rem] w-full outline-none shadow-lg"
                     onChange={handleConfirmPasswordState}
                     onMouseOver={() => handleMouseOver("Confirm Password")}
@@ -377,9 +380,8 @@ const SignUp = () => {
                 </div>
 
                 <div
-                  className={` ${
-                    isDark ? "text-white" : ""
-                  } flex space-x-2 justify-center font-[500]  `}
+                  className={` ${isDark ? "text-white" : ""
+                    } flex space-x-2 justify-center font-[500]  `}
                 >
                   <label className="space-x-2">
                     <input
@@ -401,9 +403,8 @@ const SignUp = () => {
                 </div>
 
                 <div
-                  className={`flex justify-center items-center flex-col ${
-                    isDark ? "text-white" : ""
-                  } `}
+                  className={`flex justify-center items-center flex-col ${isDark ? "text-white" : ""
+                    } `}
                 >
                   <div className={`font-[500] cursor-pointer  pt-8`}>
                     Already have an account?{" "}
@@ -423,6 +424,6 @@ const SignUp = () => {
       )}
     </div>
   );
-};
+});
 
 export default SignUp;

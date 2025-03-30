@@ -8,6 +8,7 @@ import {
 } from "../../Redux/slices/Patient.Redux";
 import Button from "../../Component/UtilityComponents/Button";
 import { MdOutlineCancel } from "react-icons/md";
+import { toggleAlertCheck, toggleStatusCheck } from "../../Redux/slices/signup_login.";
 interface incomingdata {
   show2?: boolean;
   handleToggleShow2?: () => void;
@@ -17,6 +18,7 @@ interface incomingdata {
   id: any;
   availability?: any;
   currentDate?: string;
+  name?:string
 }
 const ScheduleAppointmentPageModel = (props: incomingdata) => {
   const {
@@ -27,11 +29,13 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
     id,
     availability,
     currentDate,
+    name
   } = props;
 
   const { appointmementdata, color } = useAppSelector((state) => state.patient);
   const dispatch = useAppDispatch();
-
+  const { day } = useAppSelector((state) => state.stateChange)
+  const { allow_action } = useAppSelector((state) => state.patient)
   const capture_string = (key, item, index) => {
     dispatch(set_bookappointme({ key, item, index }));
     if (key === "day") {
@@ -39,11 +43,9 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
         availability?.filter((index) => {
           return index?.day === item;
         }) || [];
-      console.log(current__Day);
       dispatch(set_timings(current__Day[0]));
     }
   };
-
   return (
     <div className="fixed inset-0 flex items-end justify-center  ">
       <div className=" border-2  w-full desktop:w-[80%] h-[80vh] bg-white rounded-t-xl overflow-x-scroll custom-scrollbar ">
@@ -53,7 +55,7 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
 
         <div className="flex justify-start p-2 ">
           <div className="w-full animate-slideDown">
-            <p className="text-3xl font-[500]">Aptronix</p>
+            <p className="text-3xl font-[500]">{`Dr ${name}`||"unavailable"}</p>
             <p className="text-lg font-[500]">Schedule an appointment</p>
           </div>
           <div className="flex justify-center items-center">
@@ -70,9 +72,8 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
                 <div
                   key={index}
                   onClick={() => capture_string("day", item, index)}
-                  className={`flex justify-center items-center border-2 w-[10%] h-[4vh]  rounded-xl${
-                    color === index ? " bg-blue-500" : ""
-                  }`}
+                  className={`flex justify-center items-center border-2 w-[10%] h-[4vh]  rounded-xl${color === index ? " bg-blue-500" : ""
+                    }`}
                 >
                   <button className={``}>{item}</button>
                 </div>
@@ -99,28 +100,34 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
           <div className="w-[40%] h-[30vh] rounded-3xl bg-slate-200 flex flex-col ">
             <div className="flex flex-col justify-center items-center h-full gap-3">
               <div className="text-4xl font-[500]">
-                <p>Day: {appointmementdata.day}</p>
+                <p>Day: {(appointmementdata as any).day}</p>
               </div>
               <div className="text-4xl font-[500]">
-                <p>time: {appointmementdata.time}</p>
+                <p>time: {(appointmementdata as any).time}</p>
               </div>
             </div>
             <div
-              className="flex justify-center items-center  w-full  "
-              onClick={() =>
-                dispatch(
-                  BookAppointmentManually({
-                    day: appointmementdata?.day,
-                    time: appointmementdata?.time,
-                    id: id,
-                  })
-                )
-              }
+              className="flex justify-center items-center w-full"
+              onClick={() => {
+                if (allow_action) {
+                  dispatch(
+                    BookAppointmentManually({
+                      day: (appointmementdata as any)?.day,
+                      time: (appointmementdata as any)?.time,
+                      id: id,
+                    })
+                  );
+                } else {
+                  dispatch(toggleAlertCheck("Clinic is not open yet"));
+                }
+                dispatch(toggleStatusCheck(200));
+              }}
             >
               <button className="w-[30%] h-[4vh] bg-blue-500 border-2 rounded-lg">
-                <p>submit</p>
+                <p>Submit</p>
               </button>
             </div>
+
           </div>
         </div>
       </div>

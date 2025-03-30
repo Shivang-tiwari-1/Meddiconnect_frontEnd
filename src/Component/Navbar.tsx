@@ -12,22 +12,23 @@ import { FaUser } from "react-icons/fa";
 import { useAppSelector } from "../Redux/Store/Store";
 import { toogleDarkMode } from "../Redux/slices/StateChange.slice";
 import { setHoverField } from "../Redux/slices/signup_login.";
+import { LuMessageCircle } from "react-icons/lu";
+import { IoChatbubblesOutline } from "react-icons/io5";
 
 const Navbar = () => {
   const dispatch = useDispatch();
   const {
     doc_accessToken,
     pat_accessToken,
-    mobile,
     role,
     hoveredField,
     userData,
   } = useSelector((state: any) => state.states);
   const { isDark } = useAppSelector((state) => state.stateChange);
+  const { nav_icon_update } = useAppSelector((state) => state.stateChange)
   const handleMouseOver = (fieldName: string) => {
     dispatch(setHoverField(fieldName));
   };
-
   const handleMouseOut = () => {
     dispatch(setHoverField(""));
   };
@@ -53,9 +54,9 @@ const Navbar = () => {
                   />
                 )}
               </div>
-              <div className="flex w-[30%] justify-end items-center gap-7">
+              <div className="flex tablet:w-[30%] laptop:w-[20%] desktop:w-[20%] justify-end items-center gap-7">
                 <div
-                  className="w-[10%] cursor-pointer"
+                  className="w-[33%] cursor-pointer flex justify-center"
                   data-tooltip-id="my-tooltip"
                   data-tooltip-content="Notifications"
                 >
@@ -73,15 +74,20 @@ const Navbar = () => {
                     )}
                   </Link>
                 </div>
-                <div className="cursor-pointer">
+                <div className="cursor-pointer flex justify-center items-center w-[33%] ">
                   <Link to="/account">
-                    {isDark ? (
-                      <FaUser size={30} color={`${textWhite}`} />
-                    ) : (
-                      <FaUser size={30} color={`${primaryBlack}`} />
-                    )}
+                    <div className="flex justify-center items-center rounded-full overflow-hidden w-16 h-16">
+                      <div className="w-full h-full flex justify-center items-center">
+                        <img
+                          src={userData?.data?.profileImage}
+                          alt="Profile"
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      </div>
+                    </div>
                   </Link>
                 </div>
+
 
                 <div
                   onMouseOut={handleMouseOut}
@@ -112,6 +118,15 @@ const Navbar = () => {
                     </>
                   )}
                 </div>
+                <div>
+                  {nav_icon_update && (<Link to="/account">
+                    {isDark ? (
+                      <IoChatbubblesOutline size={35} color={`${textWhite}`} />
+                    ) : (
+                      <IoChatbubblesOutline size={35} color={`${primaryBlack}`} />
+                    )}
+                  </Link>)}
+                </div>
               </div>
             </div>
 
@@ -128,8 +143,8 @@ const Navbar = () => {
                     Doctors
                   </div>
                 </Link>
-                <Link to="/chat">
-                  <div className="cursor-pointer hover:bg-primaryBlue px-6 py-2 hover:text-textWhite">
+               <Link to="/chat">
+                   <div className="cursor-pointer hover:bg-primaryBlue px-6 py-2 hover:text-textWhite">
                     By criteria
                   </div>
                 </Link>
@@ -182,14 +197,16 @@ const Navbar = () => {
                     </Link>
                   </div>
 
-                  <div className="cursor-pointer flex justify-center items-center w-[30%]">
+                  <div className="cursor-pointer flex justify-center items-center w-full ">
                     <Link to="/account">
-                      <div className="flex justify-center items-center">
-                        <img
-                          src={userData?.data?.profileImage}
-                          alt="Profile"
-                          className="desktop:w-[40%] tablet:w-[70%] h-full object-contain rounded-full"
-                        />
+                      <div className="flex justify-center items-center rounded-full overflow-hidden w-16 h-16 ">
+                        <div className="w-full h-full flex justify-center items-center">
+                          <img
+                            src={userData?.data?.profileImage}
+                            alt="Profile"
+                            className="w-full h-full object-contain rounded-full"
+                          />
+                        </div>
                       </div>
                     </Link>
                   </div>
@@ -222,6 +239,15 @@ const Navbar = () => {
                         )}
                       </>
                     )}
+                  </div>
+                  <div>
+                    {nav_icon_update && (<Link to="/FinalChatroom">
+                      {isDark ? (
+                        <IoChatbubblesOutline size={35} color={`${textWhite}`} />
+                      ) : (
+                        <IoChatbubblesOutline size={35} color={`${primaryBlack}`} />
+                      )}
+                    </Link>)}
                   </div>
                 </div>
               </div>

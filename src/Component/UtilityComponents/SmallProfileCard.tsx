@@ -1,7 +1,9 @@
 import React from "react";
 import DoctroPageModel from "./DoctroPageModel.Utility";
 import { globalResizeFunction } from "../../Utility/resizer.Utils";
-import { useAppSelector } from "../../Redux/Store/Store";
+import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
+import { is_active } from "../../Redux/slices/Doctor.Redux";
+import { current_doctor_schedul } from "../../Redux/slices/Patient.Redux";
 
 interface data {
   name?: string;
@@ -35,9 +37,10 @@ interface data {
   hoveredField?: string;
   isActive?: boolean;
   docisActive?: boolean;
+  phone?:number
 }
 
-const SmallProfileCard = (props: data) => {
+const SmallProfileCard: React.FC<data> = React.memo((props) => {
   const {
     name,
     role,
@@ -54,7 +57,7 @@ const SmallProfileCard = (props: data) => {
     show4,
     handleToggleShow4,
     isDark,
-    
+    isActive,
     id,
     doctor,
     Max,
@@ -63,13 +66,16 @@ const SmallProfileCard = (props: data) => {
     handleMouseOut,
     handleMouseOver,
     hoveredField,
-    isActive,
     specializedIn,
     timings,
-    docisActive
-  } = props;
+    phone
 
-  globalResizeFunction();
+  } = props;
+  const dispatch = useAppDispatch();
+  const { day } = useAppSelector((state) => state.stateChange)
+  dispatch(is_active(id));
+  dispatch(current_doctor_schedul(day))
+  
   return (
     <>
       {show ? (
@@ -100,15 +106,14 @@ const SmallProfileCard = (props: data) => {
             hoveredField={hoveredField}
             specializedIn={specializedIn}
             timings={timings}
+            phone={phone}
           />
         </div>
       ) : (
         <button
-          className={`flex items-center flex-row justify-around w-full  ${
-            isDark ? "dark" : ""
-          }  ${
-            availability?.length === 0 ? "cursor-not-allowed opacity-50" : ""
-          } `}
+          className={`flex items-center flex-row justify-around w-full  ${isDark ? "dark" : ""
+            }  ${availability?.length === 0 ? "cursor-not-allowed opacity-50" : ""
+            } `}
           onClick={handleToggleShow}
         >
           <div className={`flex justify-start dark:bg-bgColorDarkBlack gap-5`}>
@@ -133,11 +138,17 @@ const SmallProfileCard = (props: data) => {
           <div
             className={`w-[4rem] flex justify-center items-center flex-col gap-2`}
           >
-            {!docisActive ? (
-              <div className="border-2 w-3 h-3 rounded-full bg-primaryRed"></div>
-            ) : (
-              <div className="border-2 w-3 h-3 rounded-full bg-primaryGreen"></div>
-            )}
+            {
+              isActive ? (
+
+                <div className="border-2 w-3 h-3 rounded-full bg-primaryGreen opacity-0 animate-fadeInScale delay-1000"></div>
+              )
+                : (
+                  <div className="border-2 w-3 h-3 rounded-full bg-primaryRed opacity-0 animate-fadeInScale delay-1000 "></div>
+
+                )
+            }
+
             <div>
               {availability?.length > 0 ? (
                 <div className="w-28">
@@ -153,10 +164,10 @@ const SmallProfileCard = (props: data) => {
               )}
             </div>
           </div>
-        </button>
+        </button >
       )}
     </>
   );
-};
+});
 
 export default SmallProfileCard;

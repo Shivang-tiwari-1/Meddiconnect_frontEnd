@@ -11,21 +11,19 @@ import {
 import Button from "../UtilityComponents/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { hashData } from "../../Hashing/hashing";
+import { set_isActive } from "../../Redux/slices/Doctor.Redux";
+import { subscribe_events } from "../../Sockets/Initialize_socket";
+import { socket } from "../../Constants";
 
-const Login = () => {
+const Login = React.memo(() => {
   const navigate = useNavigate();
 
   //**************************APPSELECTOR****************/
   const {
     showPassword,
-    mobile,
     credentials,
     hoveredField,
-    role,
     userData,
-    hashedData,
-    doc_accessToken,
-    pat_accessToken,
   } = useAppSelector((state) => state.states);
   const { isDark } = useAppSelector((state) => state.stateChange);
   //*************************DISPATCH********************/
@@ -46,13 +44,15 @@ const Login = () => {
       login({
         email: credentials?.email,
         password: credentials?.password,
-        role: credentials?.role,
+      role: credentials?.role,
       })
     ).then((action) => {
       if (action.type === "user/login/fulfilled") {
         setTimeout(() => {
           if (credentials?.role === "doctor") {
             navigate("/DocHome", { replace: true });
+         
+            dispatch(set_isActive());
           } else if (credentials?.role === "patient") {
             navigate(`/home`, { replace: true });
           }
@@ -100,9 +100,8 @@ const Login = () => {
 
   return (
     <div
-      className={` ${
-        isDark ? "bg-lightBlack " : ""
-      } flex w-[100%]  h-[85vh] justify-center items-center   `}
+      className={` ${isDark ? "bg-lightBlack " : ""
+        } flex w-[100%]  h-[85vh] justify-center items-center   `}
     >
       <div className="flex flex-col justify-center items-center mt-[2rem]  pb-[9rem] desktop:w-[40%] tablet:w-[90%]">
         <div className="w-full flex flex-col justify-center items-center">
@@ -176,8 +175,8 @@ const Login = () => {
                       {credentials?.password.length === 0
                         ? " "
                         : showPassword
-                        ? "Hide"
-                        : "Show"}
+                          ? "Hide"
+                          : "Show"}
                     </button>
                   </span>
                 </div>
@@ -193,9 +192,8 @@ const Login = () => {
 
               <div className="flex justify-center items-center flex-col">
                 <div
-                  className={`font-[500] cursor-pointer pt-8 ${
-                    isDark ? "text-white" : ""
-                  }`}
+                  className={`font-[500] cursor-pointer pt-8 ${isDark ? "text-white" : ""
+                    }`}
                 >
                   create your{" "}
                   <Link to="#" className="text-primaryBlue">
@@ -213,6 +211,6 @@ const Login = () => {
       </div>
     </div>
   );
-};
+});
 
 export default Login;

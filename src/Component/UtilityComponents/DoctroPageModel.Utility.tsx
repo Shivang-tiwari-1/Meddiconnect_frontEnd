@@ -4,15 +4,17 @@ import BookeAppointManually from "../../Utility/PageModel/BookeAppointManually";
 import { FaUserDoctor } from "react-icons/fa6";
 import {
   BookAppointMent,
+  current_doctor_schedul,
   setOpenDoctorById,
   setOpenDoctorId,
   toogleShow,
 } from "../../Redux/slices/Patient.Redux";
-import { useAppDispatch } from "../../Redux/Store/Store";
+import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import { BsCalendar2DateFill } from "react-icons/bs";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { IoChatbubble } from "react-icons/io5";
-import { set_hashed_id } from "../../Redux/slices/signup_login.";
+import { set_hashed_id, toggleAlertCheck, toggleStatusCheck } from "../../Redux/slices/signup_login.";
+import { setClientsidenavigation } from "../../Redux/slices/Message.Redux";
 
 interface AvailabilityItem {
   day?: string;
@@ -50,8 +52,10 @@ interface data {
   hoveredField?: string;
   handleToggleShow2?: () => void;
   timings?: any;
+  phone?: number;
+
 }
-const DoctroPageModel = (props: data) => {
+const DoctroPageModel: React.FC<data> = React.memo((props) => {
   const location = useLocation();
   const navigate = useNavigate();
   const {
@@ -71,12 +75,17 @@ const DoctroPageModel = (props: data) => {
     show2,
     handleToggleShow2,
     timings,
+    name,
+    phone,
+    address,
+    role
   } = props;
   const [click, SetClick] = useState(false);
   const [change, StateChange] = useState(" ");
-  const [open, setOpen] = useState(false);
   const dispatch = useAppDispatch();
-
+  const { day } = useAppSelector((state) => state.stateChange)
+  const { allow_action } = useAppSelector((state) => state.patient)
+  dispatch(current_doctor_schedul(day))
   const check_day =
     availability?.filter((index) => {
       return index?.day === change;
@@ -89,19 +98,21 @@ const DoctroPageModel = (props: data) => {
 
   const handleClick = () => {
     dispatch(setOpenDoctorById(id));
+    dispatch(setOpenDoctorId(null));
+    dispatch(setClientsidenavigation({ userdata: { id, profileImage, name, role }, role: "patient" }));
+
   };
 
   const multiple_Actions = () => {
     handleToggleShow4?.();
-    dispatch(setOpenDoctorId(null));
+    // dispatch(setOpenDoctorId(null));
   };
 
   return (
     <div className="fixed inset-0 flex items-center justify-evenly bg-black bg-opacity-80 ">
       <div
-        className={`${
-          isDark ? "bg-gray-800" : "bg-white"
-        } p-8 rounded-[2rem] shadow-lg w-full max-w-[70%] h-[60vh] flex justify-between laptop:w-[50%] relative `}
+        className={`${isDark ? "bg-gray-800" : "bg-white"
+          } p-8 rounded-[2rem] shadow-lg w-full max-w-[70%] h-[60vh] flex justify-between laptop:w-[50%] relative `}
       >
         <div className="flex justify-evenly flex-col items-start w-[45%]  h-[50vh] ">
           <div className="flex justify-center w-full items-center h-[20vh]">
@@ -150,9 +161,8 @@ const DoctroPageModel = (props: data) => {
           ) : (
             <div className="transition-all duration-500 ease-in-out flex justify-center items-center z-50">
               <div
-                className={`absolute border-2 w-[30%] h-[23vh] rounded-3xl opacity-90 p-4 flex flex-col items-center justify-between ${
-                  isDark ? "bg-bgColorDarkBlack" : "bg-white "
-                }`}
+                className={`absolute border-2 w-[30%] h-[23vh] rounded-3xl opacity-90 p-4 flex flex-col items-center justify-between ${isDark ? "bg-bgColorDarkBlack" : "bg-white "
+                  }`}
               >
                 {/* Availability Buttons */}
                 <div className="w-full">
@@ -160,11 +170,10 @@ const DoctroPageModel = (props: data) => {
                     <button
                       key={idx}
                       value={item.day}
-                      className={`flex justify-center items-center w-full h-[2.7vh] my-[1.5px] transition-transform duration-300 ease-in-out transform hover:scale-105  rounded-2xl   font-semibold shadow-md hover:shadow-lg ${
-                        isDark
-                          ? "bg-bgColorDarkBlack"
-                          : "bg-white  hover:border-t-2 hover:border-b-2"
-                      }`}
+                      className={`flex justify-center items-center w-full h-[2.7vh] my-[1.5px] transition-transform duration-300 ease-in-out transform hover:scale-105  rounded-2xl   font-semibold shadow-md hover:shadow-lg ${isDark
+                        ? "bg-bgColorDarkBlack"
+                        : "bg-white  hover:border-t-2 hover:border-b-2"
+                        }`}
                       onClick={(e) => {
                         const target = e.target as HTMLButtonElement;
                         StateChange(target.value);
@@ -177,9 +186,8 @@ const DoctroPageModel = (props: data) => {
 
                 {/* Centered Back Button */}
                 <button
-                  className={`flex justify-center items-center mt-2 p-2 rounded-lg  font-semibold transition-colors duration-300 hover:scale-105 ease-in-out ${
-                    isDark ? "bg-bgColorDarkBlack" : "bg-white"
-                  }`}
+                  className={`flex justify-center items-center mt-2 p-2 rounded-lg  font-semibold transition-colors duration-300 hover:scale-105 ease-in-out ${isDark ? "bg-bgColorDarkBlack" : "bg-white"
+                    }`}
                   onClick={() => SetClick(false)}
                 >
                   Back
@@ -199,9 +207,8 @@ const DoctroPageModel = (props: data) => {
           }
         </div>
         <div
-          className={`flex flex-col justify-around py-3  w-[45%] h-[50vh] ${
-            isDark ? "text-white" : "text-black"
-          }`}
+          className={`flex flex-col justify-around py-3  w-[45%] h-[50vh] ${isDark ? "text-white" : "text-black"
+            }`}
         >
           <div className="flex h-[20vh] w-full">
             <div className="flex justify-end items-end w-full px-[2rem] pb-2 border-b-4 border-gray-500">
@@ -224,9 +231,9 @@ const DoctroPageModel = (props: data) => {
           </div>
 
           {check_day?.length === 0 &&
-          check_day[0]?.date !== currentDate &&
-          check_day[0]?.day !== change &&
-          currentDate?.length === 0 ? (
+            check_day[0]?.date !== currentDate &&
+            check_day[0]?.day !== change &&
+            currentDate?.length === 0 ? (
             <div className=" flex items-center justify-around w-full h-[23vh] border-2 rounded-[3rem] shadow-lg  flex-col">
               <div className={`flex w-full justify-around`}>
                 <div className="border-2 rounded-2xl bg-red-400 w-[50%] h-[6vh] flex justify-center items-center">
@@ -241,17 +248,19 @@ const DoctroPageModel = (props: data) => {
               <div className="flex w-full justify-around ">
                 <div
                   className="w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2  transition-all duration-300 ease-in-out transform hover:scale-105  shadow hover:shadow-lg cursor-pointer"
-                  onClick={() => dispatch(BookAppointMent(id))}
+                  onClick={() => {
+                    allow_action ? dispatch(BookAppointMent(id)) : dispatch(toggleAlertCheck("linic is not open yet"));
+                    dispatch(toggleStatusCheck(200));
+                  }}
                 >
                   <p className="text-xl font-bold ">Next</p>
                 </div>
 
                 <div
-                  className={`w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2 ${
-                    !show4
-                      ? "transition-all duration-300 ease-in-out transform hover:scale-105  shadow hover:shadow-lg cursor-pointer"
-                      : ""
-                  } `}
+                  className={`w-[40%] h-[5vh] rounded-lg flex justify-center items-center border-2 ${!show4
+                    ? "transition-all duration-300 ease-in-out transform hover:scale-105  shadow hover:shadow-lg cursor-pointer"
+                    : ""
+                    } `}
                 >
                   {!show4 ? (
                     <button onClick={multiple_Actions}>
@@ -268,6 +277,9 @@ const DoctroPageModel = (props: data) => {
                       id={id}
                       availability={availability}
                       currentDate={currentDate}
+                      address={address}
+                      phone={phone}
+                      name={name}
                     />
                   )}
                 </div>
@@ -284,6 +296,6 @@ const DoctroPageModel = (props: data) => {
       </div>
     </div>
   );
-};
+});
 
 export default DoctroPageModel;
