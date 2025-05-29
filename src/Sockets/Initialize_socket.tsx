@@ -1,85 +1,162 @@
+import { data_fetch } from "../../../../backend/src/Repository/userRepository";
 import { socket } from "../Constants";
 import { setRecords, setRecords2, SetText } from "../Redux/slices/Message.Redux";
 import { addMessage } from "../Redux/slices/socketRedux";
 
-export const sendDataSocket = (dispatch: any, socket: any, userData: any) => {
-  if (socket) {
+export const sendDataSocket = async (dispatch: any, socket: any, userData: any) => {
+  return new Promise((resolve, reject) => {
     if (socket.connected) {
-      socket.emit("connected", userData, socket?.id);
+      socket.emit("connected", userData, socket?.id, (response) => {
+        if (response?.status === 'ok') {
+          resolve(true)
+        } else {
+          reject(response?.error || "Backend failed to connect");
+        }
+      });
+    } else {
+      reject("Socket not connected");
     }
-  }
+  });
 };
-export const receivedmessage = (socket: any, dispatch: any) => {
+export const receivedmessage = async (socket: any, dispatch: any) => {
   if (socket) {
     socket.on("message", (message) => {
       dispatch(addMessage(message));
     });
   }
 };
-export const liveNotification = (socket: any, dispatch: any) => {
+export const liveNotification = async (socket: any, dispatch: any) => {
   if (socket?.connected) {
     socket.on("liveMessage", (message) => {
       console.log(message);
     });
   }
 };
-export const sendMessage = (
+export const sendMessage = async (
   socket: any,
   dispatch: any,
   receiver: Object,
   sender: Object,
   message: string,
-  role: any
-) => {
-  if (socket?.connected) {
-    if ((receiver as any)?.
-      receiver && (sender as any)?.sender) {
-      const socketid = socket.id;
-      socket.emit("sending_message", receiver, sender, socketid, message);
-      dispatch(SetText(message));
-      dispatch(setRecords2({ text: message, role: "me", user_Role: role }));
-    } else {
-      console.error("id isnot there", receiver, sender)
-    }
-  }
-};
-export const subscribe_events = (
-  socket: any,
-  id: string | null,
-  trigger_event: string
+  role: any,
+  audioBase64data: any
 ) => {
 
-  if (socket?.connected && id && trigger_event) {
-    socket.emit("subscribe_events", id, trigger_event);
-  } else {
-    console.error("something missing ", id, trigger_event)
-  }
+  return new Promise((resolve, reject) => {
+    if (socket?.connected) {
+      if ((receiver as any)?.
+        receiver && (sender as any)?.sender) {
+        const socketid = socket.id;
+
+        socket.emit("sending_message", receiver, sender, socketid, message, (response) => {
+          if (response?.status === 'ok') {
+            resolve(true);
+            dispatch(SetText(message));
+            dispatch(setRecords2({ audioBase64data: audioBase64data, text: message, role: "me", user_Role: role }));
+          } else {
+            reject(response?.error || "Backend failed to connect");
+          }
+        });
+      } else {
+        reject("Socket not connected");
+      }
+    }
+  })
+
 };
-export const single_doctor_active = (id) => {
+export const subscribe_events = async (
+  socket: any,
+  data: any,
+  trigger_event: string,
+
+) => {
+  return new Promise((resolve, reject) => {
+    if (socket?.connected && data && trigger_event) {
+
+      socket.emit("subscribe_events", data, trigger_event, (response) => {
+        if (response?.status === 'ok') {
+          resolve(true);
+        } else {
+          reject(response?.error || "Backend failed to connect");
+
+        }
+      })
+    } else {
+      reject("Socket not connected");
+    }
+  })
+
+
+};
+export const single_doctor_active = async (id) => {
   socket.emit("single_doctor_active", id);
 };
-export const updateProgressBar = (id: string) => {
-  console.log("object in socket fucntion")
-  if (!id) {
-    throw new Error('id not present')
-  } else if (typeof id !== "string") {
-    throw new Error('id is not a string')
-  }
-  socket.emit("updateProgressBar", id)
-}
-export const joinroom = (socket: any, roomname: string) => {
-  if (!roomname) {
-    return console.error("roomname not available");
-  }
-  socket.emit("join_room", roomname);
-}
-export const redis_call = () => {
-}
-export const response_to_mess = (socket: any, sender: string, recipent: string, role: string) => {
+export const updateProgressBar = async (data: object) => {
+  console.log("hi")
+  return new Promise((resolve, reject) => {
+    if (!data) {
+      reject('id not present')
+    } else if (typeof data !== "object") {
+      reject('data is not an object')
+    } else {
+      socket.emit("updateProgressBar", data, (response) => {
+        if (response.ok === "ok") {
+          resolve(true);
+        } else {
+          reject(response?.error || "Backend failed to connect");
+        }
+      })
+    }
+  })
+};
+export const joinroom = async (socket: any, roomname: object) => {
+
+  return new Promise((resolve, reject) => {
+    if (socket.connected) {
+      socket.emit("join_room", roomname, (response) => {
+        if (response?.status === 'ok') {
+          resolve(true)
+        } else {
+          reject(response?.error || "Backend failed to connect");
+
+        }
+      });
+    } else {
+      reject("Socket not connected");
+    }
+  })
+};
+export const redis_call = async () => {
+};
+export const response_to_mess = async (socket: any, sender: string, recipent: string, role: string) => {
   if (!socket) {
     console.error("something worng woth the socket")
   }
   socket.emit("fetch_from_redis", sender, recipent, role)
+};
+export const reconnect_to_socket = async (socket: any, data) => {
+  if (!data) {
+    console.warn("data not available");
+  } else {
+    socket.emit("reconnect_to_socket", data);
+  }
+};
+export const disconnected_payload = async (socket: any, data) => {
+  socket.emit("manual-disconnect", data)
+}
+export const doctorInformation = async (socket: any, data: object) => {
+  return new Promise((resolve, reject) => {
+    if (socket.connected) {
+      socket.emit("ratings", data, (response) => {
+        if (response?.status === 'ok') {
+          resolve(true)
+        }
+      });
+    } else {
+      reject("Socket not connected");
+    }
+  })
+
 }
 
 

@@ -1,18 +1,16 @@
 import {
   createAsyncThunk,
   createSlice,
-  isRejectedWithValue,
 } from "@reduxjs/toolkit";
 import { axiosPrivate, axiosPrivatefile } from "../../Api/Axios.Api";
 import {
-  progressBar,
   toggleAlertCheck,
   toggleStatusCheck,
 } from "./signup_login.";
-import { RootState, useAppDispatch, useAppSelector } from "../Store/Store";
-import { toogleShow2, toogleShow3, toogleShow4 } from "./Patient.Redux";
+import { RootState } from "../Store/Store";
+import { toogleShow2, toogleShow3 } from "./Patient.Redux";
 import moment from "moment";
-import { convertAMPMToISO, convertTo12HourFormat } from "../../Services/service";
+import { convertTo12HourFormat } from "../../Services/service";
 
 //-----------------------------------interfaces----------------------------------------//
 export interface medicationObjects {
@@ -78,7 +76,10 @@ interface stateManagement {
   is_Active?: boolean
   active_doctors?: object[];
   current_day_schedul?: object[];
-  last_active?: string | null
+  last_active?: string | null;
+  rating?: object[];
+  yourRatings?: Number;
+  averageRatings?: Number;
 };
 interface Doctor {
   userId: string;
@@ -222,8 +223,6 @@ export const sendprescription = createAsyncThunk(
   }
 );
 export const spealisesIn = createAsyncThunk(
-
-
   "doctor/spealisesIn",
   async (data, { dispatch, getState, rejectWithValue }) => {
     console.log(data);
@@ -432,13 +431,11 @@ const initialState: stateManagement = {
   specializationExists: false,
   qualificationExists: false,
   availabilityExists: false,
-  active_doctors: [{
-    Online: false,
-    doctorId: "",
-    lastActive: ""
-  }],
+  active_doctors: [],
   current_day_schedul: [{}],
-  last_active: null
+  last_active: null,
+  yourRatings: 0,
+  rating: []
 };
 
 const DoctorState = createSlice({
@@ -584,17 +581,16 @@ const DoctorState = createSlice({
       state.is_Active = true;
     },
     activeDoctors: (state, action) => {
-      console.log(action.payload)
-      state.active_doctors = action.payload
-      console.log(JSON.parse(JSON.stringify(state.active_doctors)))
+
+      state.active_doctors = action.payload[0];
+      state.rating = action.payload[1];
+
     },
     is_active: (state, action) => {
       if (state.active_doctors) {
         const userExists = state.active_doctors.some((doctor: any) => {
           return doctor.userId === action.payload && doctor.online
         })
-        console.log(action.payload)
-        console.log(userExists)
         state.is_Active = userExists;
       }
     },
@@ -604,15 +600,37 @@ const DoctorState = createSlice({
         return doctor.userId === action.payload
       })
       if (userExists !== undefined) {
-        const date = moment(new Date((userExists as any).lastActive)).format(" HH:mm:ss");
-        const time = convertTo12HourFormat(date)
-        state.last_active = time;
+        const today_date = moment(new Date()).format("MM-DD-YYYY")
+        const date = moment(new Date((userExists as any).lastActive)).format("MM-DD-YYYY");
+        const dat2 = moment(new Date((userExists as any).lastActive)).format("HH:MM:SS");
+        const time = convertTo12HourFormat(dat2)
+        today_date === date ? state.last_active = time : state.last_active = `${date} ${time}`
 
       } else {
         state.last_active = null;
 
       }
 
+    },
+    setqualificationExists: (state, action) => {
+      state.qualificationExists = action.payload;
+    },
+    setavailabilityExists: (state, action) => {
+      state.availabilityExists = action.payload;
+    },
+    setspecializationExists: (state, action) => {
+      state.specializationExists = action.payload;
+    },
+    set_rating: (state: any, action) => {
+      const { id } = action.payload;
+      let your_rating;
+      if (state.rating !== null) {
+        your_rating = state.rating.find((data) => {
+          return data.id === id
+        });
+      }
+
+      state.yourRatings = your_rating;
     }
   },
 
@@ -652,10 +670,7 @@ const DoctorState = createSlice({
         state.loading = false;
       })
       .addCase(setDocDocuments.fulfilled, (state, action) => {
-        console.log("hi");
         state.qualificationExists = true;
-        console.log("hi", state.qualificationExists);
-
         state.loading = false;
       })
       .addCase(setDocDocuments.rejected, (state) => {
@@ -691,7 +706,11 @@ export const {
   set_isActive,
   activeDoctors,
   is_active,
-  last_Active
+  last_Active,
+  setqualificationExists,
+  setavailabilityExists,
+  setspecializationExists,
+  set_rating
 } = DoctorState.actions;
 
 export default DoctorState.reducer;

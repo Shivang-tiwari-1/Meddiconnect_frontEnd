@@ -54,7 +54,7 @@ const Cards: React.FC<incomingdata> = ({
 
   const { loading, qualificationExists, availabilityExists,
     specializationExists } = useAppSelector((state) => state.doctor)
-  console.log(qualificationExists)
+    console.log(qualificationExists)
   return (
     <>
       {/* Document Card */}

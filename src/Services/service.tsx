@@ -69,7 +69,7 @@ export const get_Current_location = async (geolocation_Object, dispatch) => {
   }
 };
 const toRadians = (degrees) => degrees * (Math.PI / 180);
-export const haversineDistance = (lat1, lat2, lon1, lon2) => {
+export const haversineDistance = (lat1, lon1, lat2, lon2) => {
   const R = 6371;
   const φ1 = toRadians(lat1);
   const φ2 = toRadians(lat2);
@@ -84,6 +84,7 @@ export const haversineDistance = (lat1, lat2, lon1, lon2) => {
   const distance = R * c;
   return distance;
 };
+
 export const get_date = () => {
   const now = new Date()
   console.log(now)
@@ -91,3 +92,43 @@ export const get_date = () => {
   console.log(date)
   console.log(date.day("ddd"))
 }
+export const blobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+}
+
+export const base64ToBlob = (base64: string, mimeType: string): Blob => {
+  const binary = Uint8Array.from(atob(base64.split(',')[1]), c => c.charCodeAt(0));
+  return new Blob([binary], { type: mimeType });
+}
+
+
+export const processdata_label = (array) => {
+  const groupedMessages = {};
+
+  array.forEach((msg) => {
+    const timestamp = Number(msg.timeStamp);
+    const date = moment(timestamp);
+
+    let label = "";
+
+    if (moment().isSame(date, "day")) {
+      label = "Today";
+    } else if (moment().subtract(1, "day").isSame(date, "day")) {
+      label = "Yesterday";
+    } else {
+      label = date.format("MMMM DD, YYYY");
+    }
+
+    if (!groupedMessages[label]) {
+      groupedMessages[label] = [];
+    }
+
+    groupedMessages[label].push(msg);
+  });
+  return groupedMessages;
+};

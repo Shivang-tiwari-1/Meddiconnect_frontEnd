@@ -37,7 +37,9 @@ interface data {
   hoveredField?: string;
   isActive?: boolean;
   docisActive?: boolean;
-  phone?:number
+  phone?: number;
+  coordinates?: number[];
+  charges?: number
 }
 
 const SmallProfileCard: React.FC<data> = React.memo((props) => {
@@ -68,13 +70,15 @@ const SmallProfileCard: React.FC<data> = React.memo((props) => {
     hoveredField,
     specializedIn,
     timings,
-    phone
+    phone,
+    coordinates,
+    charges
 
   } = props;
   const dispatch = useAppDispatch();
   const { day } = useAppSelector((state) => state.stateChange)
   dispatch(is_active(id));
-  dispatch(current_doctor_schedul(day))
+  dispatch(current_doctor_schedul({ id: id, day: day?.toLowerCase() }));
   
   return (
     <>
@@ -107,6 +111,8 @@ const SmallProfileCard: React.FC<data> = React.memo((props) => {
             specializedIn={specializedIn}
             timings={timings}
             phone={phone}
+            coordinates={coordinates}
+            charges={charges}
           />
         </div>
       ) : (

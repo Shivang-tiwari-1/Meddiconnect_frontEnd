@@ -24,10 +24,12 @@ export default {
         textGrey: "#6f767e",
       },
       screens: {
-        mobile: "375px",
-        tablet: "601px",
-        laptop: "1024px",
-        desktop: "1280px",
+        maxMobile: { max: "374px" },
+        mobile: { min: "375px", max: "429px" },  
+        mobilexl: { min: "430px", max: "600px" },
+        tablet: { min: "601px", max: "1023px" },
+        laptop: { min: "1024px", max: "1279px" },
+        desktop: "1280px",  
       },
       fontFamily: {
         apple: [

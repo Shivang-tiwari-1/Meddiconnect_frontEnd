@@ -20,6 +20,5 @@ export const searchButtonStyles =
   "hover:shadow-md hover:w-32 transition-width duration-300 ease-in-out";
 
 export const socket = io("http://localhost:5000", {
-  withCredentials: true,
+  withCredentials: true
 });
-

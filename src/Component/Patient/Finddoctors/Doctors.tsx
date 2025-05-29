@@ -34,8 +34,10 @@ interface doctros {
   handleToggleShow2?: () => void;
   timings?: any;
   docisActive?: boolean;
-  phone?:number
-}
+  phone?: number;
+  coordinates?: number[]
+  charges?: number
+};
 
 const Doctors: React.FC<doctros> = React.memo((props) => {
   const {
@@ -66,22 +68,24 @@ const Doctors: React.FC<doctros> = React.memo((props) => {
     timings,
     docisActive,
     show,
-    phone
+    phone,
+    coordinates,
+    charges
   } = props
 
   let isOpen = openUserId === id;
- 
+
   const currentDate = useMemo(() => {
     return new Date().toLocaleDateString("en-US", { weekday: "long" }).toLowerCase();
   }, []);
- 
-  
+
+
   return (
     <div
       className={`border rounded-[50px] w-[100%] bg-white opacity-9 shadow-2xl ${isDark ? "dark" : ""
         }  dark:bg-bgColorDarkBlack   `}
     >
-      <div className="w-full tablet:w-full tablet:h-[100px] rounded-t bg-cover flex justify-start items-center">
+      <div className="w-full tablet:w-full tablet:h-[100px] rounded-t bg-cover flex justify-start items-center h-[100px]">
         <SmallProfileCard
           name={name}
           profileImage={profileImage}
@@ -111,6 +115,8 @@ const Doctors: React.FC<doctros> = React.memo((props) => {
           timings={timings}
           docisActive={docisActive}
           phone={phone}
+          coordinates={coordinates}
+          charges={charges}
         />
       </div>
     </div>

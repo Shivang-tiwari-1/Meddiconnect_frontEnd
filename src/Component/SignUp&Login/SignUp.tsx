@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import {
+  reSetCredentials,
   setCredentials,
   setHoverField,
   toggleShowPassword,
@@ -17,7 +17,7 @@ import { IoMdLocate } from "react-icons/io";
 import { get_Current_location } from "../../Services/service";
 import Loader from "../../Utility/loader/Loader";
 
-const SignUp =React.memo( () => {
+const SignUp = React.memo(() => {
   const navigate = useNavigate();
 
   //**************************APPSELECTOR****************/
@@ -87,57 +87,16 @@ const SignUp =React.memo( () => {
     if (profileImage) { formData.append("profileImage", profileImage); } else {
       throw new Error('no profile imahe')
     }
-    formData.append("latitude", coordinates?.latitude);
-    formData.append("longitude", coordinates?.longitude);
+    formData.append("latitude", (coordinates as any)?.latitude);
+    formData.append("longitude", (coordinates as any)?.longitude);
     dispatch(signup(formData)).then((action) => {
       if (action.type === "user/signup/fulfilled") {
         navigate("/login", { replace: true });
       }
     });
-
     dispatch(
-      setCredentials({
-        field: "email",
-        value: "",
-      })
+      reSetCredentials()
     );
-    dispatch(
-      setCredentials({
-        field: "password",
-        value: "",
-      })
-    );
-    dispatch(
-      setCredentials({
-        field: "role",
-        value: "",
-      })
-    );
-    dispatch(
-      setCredentials({
-        field: "phone",
-        value: "",
-      })
-    );
-    dispatch(
-      setCredentials({
-        field: "address",
-        value: "",
-      })
-    );
-    dispatch(
-      setCredentials({
-        field: "profileImage",
-        value: "",
-      })
-    );
-    dispatch(
-      setCredentials({
-        field: "name",
-        value: "",
-      })
-    );
-
     dispatch(toogleCongirmPassword(""));
   };
   const handleMouseOver = (fieldNam: string) => {
@@ -150,18 +109,17 @@ const SignUp =React.memo( () => {
 
   return (
     <div
-      className={`flex w-[100%] h-[${mobile ? "100vh" : "85vh"
-        }] justify-center items-center ${isDark ? "bg-lightBlack" : "bg-white"}`}
+      className={`flex w-[100%] mobile:h-[100vh] desktop:h-[86vh] justify-center items-center ${isDark ? "bg-lightBlack" : "bg-white"}`}
     >
       {loading ? (
         <Loader />
       ) : (
         <div
-          className={`flex flex-col justify-center items-center mt-[2rem]  pb-[9rem] desktop:w-[40%] tablet:w-[90%]  `}
+          className={`flex flex-col justify-center items-center mt-[2rem]  pb-[9rem] desktop:w-[40%] tablet:w-[90%]  mobile:w-full `}
         >
-          <div className="w-full flex flex-col justify-center items-center">
-            <div className="flex w-[80%] flex-col justify-center items-center h-[60vh] border-2 rounded-2xl shadow-2xl">
-              <form onSubmit={handleSubmit}>
+          <div className="w-full flex flex-col justify-center items-center mobile:w-full">
+            <div className="flex w-[80%] flex-col justify-center items-center h-[60vh] border-2 rounded-2xl shadow-2xl mobile:w-[90%] mobile:h-[80vh]">
+              <form onSubmit={handleSubmit} className="mobile:w-[80%]">
                 <div className="flex flex-row pb-5 gap-[1rem] ">
                   <div className="w-1/2 relative font-[500]">
                     <select
@@ -343,7 +301,7 @@ const SignUp =React.memo( () => {
                   <input
                     type="tel"
                     name="phone"
-                    value={credentials?.phone}
+                    value={(credentials as any)?.phone}
                     id="phone"
                     required
                     placeholder="Phone"

@@ -8,15 +8,14 @@ import {
   toogleShow3,
   toogleShow4,
 } from "../../Redux/slices/Patient.Redux";
-import {
-  setHoverField,
-} from "../../Redux/slices/signup_login.";
+
 import {
   filterCollectionDay,
   setCriteria,
 } from "../../Redux/slices/Doctor.Redux";
 import Patients from "./DocHomeComponents/Patients";
 import {
+  disconnected_payload,
   joinroom,
   sendDataSocket,
   subscribe_events,
@@ -47,6 +46,7 @@ const DocHome = React.memo(() => {
     scrollx,
     IsInFocus,
     index,
+
   } = useAppSelector((state) => state.doctor);
   const { currentStep } = useAppSelector((state) => state.states);
   const {
@@ -61,19 +61,57 @@ const DocHome = React.memo(() => {
     date,
   } = useAppSelector((state) => state.states);
   const { qualificationExists, availabilityExists,
-    specializationExists } = useAppSelector((state) => state.doctor)
+    specializationExists } = useAppSelector((state) => state.doctor);
 
   useEffect(() => {
-    if (doctorData?.accessToken) {
-      sendDataSocket(dispatch, socket, (userData as any)?.data);
-      joinroom(socket, "doctor_information");
-      subscribe_events(socket, (doctorData as any)?.userData?.data?._id, "is_active_ui_update_subs");
-      subscribe_events(socket, (doctorData as any)?.userData?.data?._id?.toString(), "subscribe_message_channel");
+    const setup = async () => {
+      //to create save your  account detail on redis 
+      await sendDataSocket(dispatch, socket, (userData as any)?.data);
+      //to receive important details
+      await subscribe_events(socket, { id: (doctorData as any)?.userData?.data?._id?.toString(), role: (doctorData as any)?.userData?.data?.role }, "subscribe_doctor_channel");
+      //to receive messages
+      await subscribe_events(socket, { id: (doctorData as any)?.userData?.data?._id?.toString(), role: (doctorData as any)?.userData?.data?.role }, "subscribe_message_channel");
+      //to send new payload og online data to patients
+      await subscribe_events(socket, { id: (doctorData as any)?.userData?.data?._id?.toString(), role: (doctorData as any)?.userData?.data?.role }, "is_active_ui_update_subs");
+      // to receive active patient data
+      await joinroom(socket, "doctor_information");
+      //to update the progress bar 
+      if (qualificationExists && availabilityExists &&
+        specializationExists) {
+        console.log("progress bar is uptodate");
+      } else {
+          await Promise.all(  
+            [qualificationExists, availabilityExists, specializationExists].map((value) => {
+              if (value) {
+                return updateProgressBar({
+                  id: (userData as any)?.data?._id, role: (userData as any)?.data?.role
+                });
+              }
+            })
+          )
+      }
       dispatch(fetch_chatting_pat());
       dispatch(get_day())
     }
-  }, [doctorData?.accessToken]);
+    if (socket.connected && doctorData?.accessToken) {
+      setup();
+    }
+  }, [socket.connected, doctorData?.accessToken]);
 
+  useEffect(() => {
+    const manual_update = () => {
+      disconnected_payload(socket, {
+        id: (doctorData as any)?.userData?.data?._id?.toString(),
+        role: (doctorData as any)?.userData?.data?.role,
+      });
+    };
+
+    window.addEventListener('beforeunload', manual_update);
+
+    return () => {
+      window.removeEventListener('beforeunload', manual_update);
+    };
+  }, []);
 
   const handleToggleShow2 = () => {
     dispatch(toogleShow2());
@@ -92,7 +130,7 @@ const DocHome = React.memo(() => {
         dispatch(setCriteria(updatedState ?? []));
       });
       handleToggleShow4();
-      updateProgressBar((userData as any)?.data?._id);
+      updateProgressBar({ id: (userData as any)?.data?._id, role: (userData as any)?.data?.role });
 
     } else {
       console.log("error");
@@ -150,7 +188,7 @@ const DocHome = React.memo(() => {
             <div
               className={`flex flex-col justify-center items-center ${isDark ? "text-white" : ""
                 } ${qualificationExists && availabilityExists &&
-                  specializationExists ? "hidden" : ""}`}
+                specializationExists && "hidden"}`}
             >
 
               <p

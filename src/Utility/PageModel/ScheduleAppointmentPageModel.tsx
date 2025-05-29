@@ -18,24 +18,24 @@ interface incomingdata {
   id: any;
   availability?: any;
   currentDate?: string;
-  name?:string
+  name?: string;
+  capture_string?: (key, item, index) => void
+
 }
 const ScheduleAppointmentPageModel = (props: incomingdata) => {
   const {
-    show2,
-    handleToggleShow2,
     timings = [],
     days,
     id,
     availability,
-    currentDate,
-    name
+    name,
   } = props;
 
   const { appointmementdata, color } = useAppSelector((state) => state.patient);
   const dispatch = useAppDispatch();
-  const { day } = useAppSelector((state) => state.stateChange)
-  const { allow_action } = useAppSelector((state) => state.patient)
+  const { allow_action } = useAppSelector((state) => state.patient);
+  const isDark = useAppSelector((state) => state.stateChange.isDark);
+
   const capture_string = (key, item, index) => {
     dispatch(set_bookappointme({ key, item, index }));
     if (key === "day") {
@@ -46,16 +46,19 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
       dispatch(set_timings(current__Day[0]));
     }
   };
+
   return (
-    <div className="fixed inset-0 flex items-end justify-center  ">
-      <div className=" border-2  w-full desktop:w-[80%] h-[80vh] bg-white rounded-t-xl overflow-x-scroll custom-scrollbar ">
+    <div className={`fixed inset-0 flex items-end justify-center ${isDark ? "bg-bgColorDarkBlack text-white" : "bg-white"
+      }} `}>
+      <div className={` border-2  w-full desktop:w-[80%] h-[80vh] rounded-t-xl overflow-x-scroll custom-scrollbar ${isDark ? "bg-bgColorDarkBlack text-white" : "bg-white"
+        }`}>
         <div className="flex justify-center items-center">
           <div className="border-2 w-16 border-gray-500 rounded-full"></div>
         </div>
 
         <div className="flex justify-start p-2 ">
           <div className="w-full animate-slideDown">
-            <p className="text-3xl font-[500]">{`Dr ${name}`||"unavailable"}</p>
+            <p className="text-3xl font-[500]">{`Dr ${name}` || "unavailable"}</p>
             <p className="text-lg font-[500]">Schedule an appointment</p>
           </div>
           <div className="flex justify-center items-center">
@@ -66,7 +69,7 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
         </div>
 
         <div className="flex justify-center pt-4 w-full">
-          <div className="w-[90%] h-[35vh] rounded-3xl bg-slate-200 flex flex-col justify-start">
+          <div className="w-[90%] h-[35vh] rounded-3xl  flex flex-col justify-start">
             <div className="flex justify-evenly items-start mt-4">
               {days?.map((item, index) => (
                 <div
@@ -97,7 +100,7 @@ const ScheduleAppointmentPageModel = (props: incomingdata) => {
         </div>
 
         <div className="flex justify-center pt-4 w-full">
-          <div className="w-[40%] h-[30vh] rounded-3xl bg-slate-200 flex flex-col ">
+          <div className="w-[40%] h-[30vh] rounded-3xl  flex flex-col ">
             <div className="flex flex-col justify-center items-center h-full gap-3">
               <div className="text-4xl font-[500]">
                 <p>Day: {(appointmementdata as any).day}</p>

@@ -3,6 +3,9 @@ import { MdOutlineCancel } from "react-icons/md";
 import ScheduleAppointmentPageModel from "./ScheduleAppointmentPageModel";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
 import { set_timings, toogleShow2 } from "../../Redux/slices/Patient.Redux";
+import { toDatetime } from "../Function";
+import moment from "moment";
+import { haversineDistance } from "../../Services/service";
 
 interface bookingState {
   show4?: boolean;
@@ -17,14 +20,14 @@ interface bookingState {
   address?: string;
   distnace?: number;
   phone?: number;
-  name?: string
-
+  name?: string;
+  coordinates?: number[];
+  charges?: number
 }
 
 
 const BookeAppointManually = (props: bookingState) => {
   const {
-    show4,
     handleToggleShow4,
     show2,
     handleToggleShow2,
@@ -34,11 +37,18 @@ const BookeAppointManually = (props: bookingState) => {
     currentDate,
     phone,
     address,
-    name
+    name,
+    coordinates,
+    charges
   } = props;
   const dispatch = useAppDispatch();
 
-  const { timings, days } = useAppSelector((state) => state.patient);
+  const timings = useAppSelector((state) => state.patient.timings);
+  const days = useAppSelector((state) => state.patient.days);
+  const isDark = useAppSelector((state) => state.stateChange.isDark);
+  const userData = useAppSelector((state) => state.states.userData);
+
+
   const current__Day =
     availability?.filter((index) => {
       return index?.day === currentDate;
@@ -48,16 +58,27 @@ const BookeAppointManually = (props: bookingState) => {
     dispatch(set_timings(current__Day[0]));
   }, []);
 
+  const data = timings.flat().map((timeString) => toDatetime(timeString));
+  const newdate = data.filter((date) => {
+    return moment(date).isBefore(new Date().toISOString());
+  });
+
+  const lon1 = (userData as any)?.data?.coordinates[0]
+  const lat1 = (userData as any)?.data?.coordinates[1]
+  const lon2 = coordinates?.[0]
+  const lat2 = coordinates?.[1]
+
   return (
-    <div className="fixed inset-0 flex items-end justify-center z-30 ">
-      <div className=" border-2  w-full desktop:w-[80%] h-[80vh] bg-white rounded-t-xl overflow-x-scroll custom-scrollbar">
+    <div className={`fixed inset-0 flex items-end justify-center z-30 ${isDark ? "bg-black bg-opacity-80" : ""}`}>
+      <div className={`border-2  w-full desktop:w-[80%] h-auto rounded-t-xl overflow-x-scroll custom-scrollbar ${isDark ? "bg-bgColorDarkBlack text-white" : "bg-white"
+        }`}>
         <div className="flex justify-center items-center">
           <div className="border-2 w-16 border-gray-500 rounded-full"></div>
         </div>
 
         <div className="flex justify-start p-2 ">
           <div className=" w-full animate-slideDown">
-            <p className="text-3xl font-[500] ">Dr {name ||  "unavailable"}</p>
+            <p className="text-3xl font-[500] ">Dr {name || "unavailable"}</p>
             <p className="text-base font-apple">
               {address || "unavailable"}
             </p>
@@ -75,7 +96,7 @@ const BookeAppointManually = (props: bookingState) => {
               className="flex justify-center items-center border-2 w-[30%] h-16 rounded-2xl bg-blue-500 hover:scale-110 ease-in-out duration-500"
               onClick={() => dispatch(toogleShow2())}
             >
-              <p className="text-xs text-white ">Schedule</p>
+              <p className="text-xs  ">Schedule</p>
             </button>
           ) : (
             <ScheduleAppointmentPageModel
@@ -88,12 +109,10 @@ const BookeAppointManually = (props: bookingState) => {
               availability={availability}
               currentDate={currentDate}
               name={name}
-              
+
             />
           )}
-          <button className="flex justify-center items-center border-2 w-[30%] h-16 rounded-2xl hover:scale-110 ease-in-out duration-500">
-            <p className="text-xs text-black">WebSite</p>
-          </button>
+     
         </div>
 
         <div className="flex flex-col justify-between items-center w-full mt-3">
@@ -101,25 +120,32 @@ const BookeAppointManually = (props: bookingState) => {
 
           <div className="flex justify-evenly items-center w-full ">
             <div className="flex  justify-center items-center">
-              <div className="flex flex-col">
-                <p className="text-xs">NEXT AVAILABLE</p>
-                <p>Today,5:40PM</p>
+              <div className="flex flex-col justify-center items-center">
+                <p className="text-base ">NEXT AVAILABLE</p>
+                <p>{moment(newdate.pop()).format(" h:mm A")}</p>
               </div>
             </div>
+            
             <div className="border-2 w-0 h-10 rounded-lg m-1"></div>
 
             <div className="flex justify-center items-center">
-              <div className="flex flex-col">
+              <div className="flex flex-col justify-center items-center">
                 <p className="text-xs"> ESTIMATED COST</p>
-                <p className="">25,990</p>
+                <p className="">{charges}</p>
               </div>
             </div>
             <div className="border-2 w-0 h-10 rounded-lg m-1"></div>
 
             <div className="flex justify-center items-center">
-              <div className="flex flex-col">
+              <div className="flex flex-col justify-center items-center">
                 <p className="text-xs">DISTANCE</p>
-                <p className="">1.8Km</p>
+                <p className="">{`${haversineDistance(
+                  (userData as any)?.data?.coordinates[1], (userData as any)?.data?.coordinates[0],
+                  coordinates?.[1], coordinates?.[0]
+                ) === 0 ? "Close by" : Math.floor(haversineDistance(
+                  (userData as any)?.data?.coordinates[1], (userData as any)?.data?.coordinates[0],
+                  coordinates?.[1], coordinates?.[0]
+                ))}`}</p>
               </div>
             </div>
           </div>
@@ -130,30 +156,18 @@ const BookeAppointManually = (props: bookingState) => {
           <p className="text-3xl font-[500]">Doctor details</p>
 
           <div className=" flex justify-center items-center pt-2 w-full ">
-            <div className="w-[90%] h-[30vh] rounded-3xl bg-slate-200 flex flex-col justify-center">
+            <div className="w-[90%] h-[30vh] rounded-3xl  flex flex-col justify-center border-2">
               <div className="flex justify-start p-3 flex-col ">
                 <p className="text-[500] font-apple">Phone</p>
-                <p>{phone ||  "unavailable"}</p>
-              </div>
-              <div className="flex justify-start p-3 flex-col ">
-                <p className="text-[500] font-apple">website</p>
-                <a>aotronixinida.com</a>
+                <p>{phone || "unavailable"}</p>
               </div>
               <div className="flex justify-start p-3 flex-col ">
                 <p className="text-[500] font-apple">Address</p>
-                <p>9326977987</p>
+                <p>{address}</p>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-center  flex-col m-3">
-          <p className="text-3xl font-[500]">Store Opening Hour</p>
-
-          <div className=" flex justify-center items-center pt-2 w-full ">
-            <div className="w-[90%] h-[30vh] rounded-3xl bg-slate-200 flex flex-col justify-center"></div>
-          </div>
-        </div>
+        </div>  
       </div>
     </div>
   );

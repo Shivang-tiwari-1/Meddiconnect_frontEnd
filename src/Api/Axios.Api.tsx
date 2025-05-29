@@ -4,6 +4,7 @@ const BASE_URL = " http://localhost:5000";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
 });
 
 const axiosPrivate = axios.create({
@@ -21,40 +22,22 @@ const axiosPrivatefile = axios.create({
 axiosPrivate.interceptors.request.use((config) => {
   if (config.headers) {
     const { doc_accessToken, pat_accessToken, role } = Store.getState().states;
-    console.log("form axio ---->", role)
     const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
-    console.log("accessToken--->", accessToken)
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
+
 axiosPrivatefile.interceptors.request.use((config) => {
   if (config.headers) {
     const { doc_accessToken, pat_accessToken, role } = Store.getState().states;
-    console.log("form axio ---->", role)
+
     const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
-    console.log("accessToken--->", accessToken)
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
   return config;
 });
 
-// axiosPrivate.interceptors.response.use(
-//   (response) => {
-//     return response;
-//   },
-//   async (error) => {
-//     const preventRequest = error?.config;
-//     if (
-//       error?.response?.states === 403 ||
-//       preventRequest?.headers?.Authorization === `Bearer undefined`
-//     ) {
-//       try {
-//       } catch (error) {}
-//     } else {
 
-//     }
-//   }
-// );
 
 export { axiosInstance, axiosPrivate, axiosPrivatefile };

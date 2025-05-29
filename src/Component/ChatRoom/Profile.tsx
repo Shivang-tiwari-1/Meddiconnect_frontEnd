@@ -1,25 +1,44 @@
 import React, { useEffect } from "react";
 import { IoIosCall } from "react-icons/io";
-import { primaryBlack, primaryGrey, textWhite } from "../../Constants";
+import { primaryBlack, textWhite } from "../../Constants";
 import { useAppDispatch, useAppSelector } from "../../Redux/Store/Store";
-import { is_active, last_Active } from "../../Redux/slices/Doctor.Redux";
+import { is_active } from "../../Redux/slices/Doctor.Redux";
+import { bulk_write } from "../../Redux/slices/Message.Redux";
 interface incomingData {
   DoctorData?: object | null;
   isDark?: boolean;
 }
 const Profile = ({ DoctorData, isDark }: incomingData) => {
   const dispatch = useAppDispatch()
-  const { is_Active, last_active, active_doctors } = useAppSelector((state) => state.doctor);
+  const is_Active = useAppSelector((state) => state.doctor.is_Active);
+  const doctor_Text_records = useAppSelector((state) => state.MessageSlice.doctor_Text_records);
+  const last_active = useAppSelector((state) => state.doctor.last_active);
+  const patient_Text_records = useAppSelector((state) => state.MessageSlice.patient_Text_records);
+  const active_doctors = useAppSelector((state) => state.doctor.active_doctors);
+  const userData = useAppSelector((state) => state.states.userData);
 
   useEffect(() => {
     dispatch(is_active((DoctorData as any)?._id));
-  }, [active_doctors])
+  }, [active_doctors]);
+
+  useEffect(() => {
+    if (!is_Active) {
+      console.log("bulk_write action")
+      if ((userData as any)?.data.role === 'patient') {
+        dispatch(bulk_write(patient_Text_records))
+
+      } else if ((userData as any)?.data.role === 'doctor') {
+        dispatch(bulk_write(doctor_Text_records))
+
+      }
+    }
+  }, [is_Active]);
 
 
   return (
     <div
       className={`shadow-lg border rounded-full outline-none h-[6vh] w-full flex items-center  px-4  ${!isDark && "bg-[#ffff]"
-          } `}
+        } `}
     >
       <div
         className={`text-black flex justify-start items-center w-[70%] gap-5 m-[2rem] ${isDark ? "text-textWhite" : "text-black"

@@ -6,14 +6,13 @@ import axios from "axios";
 const useJwtInterceptors = () => {
   const {
     pat_accessToken,
-    pat_refreshToken,
     doc_accessToken,
-    doc_refreshToken,
     role,
   } = useAppSelector((state) => state?.states);
   const dispatch = useAppDispatch();
   const accessToken = role === "patient" ? pat_accessToken : doc_accessToken;
-  const refreshToken = role === "patient" ? pat_refreshToken : doc_refreshToken;
+  console.log("hello")
+
   axiosPrivate?.interceptors?.request?.use(async (config) => {
     if (!config?.headers?.Authorization && accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
@@ -32,17 +31,19 @@ const useJwtInterceptors = () => {
         preventRequest?.headers?.Authorization === `Bearer undefined`
       ) {
         try {
-          dispatch(refresh());
+          await dispatch(refresh());
           preventRequest.headers.Authorization = `Bearer ${accessToken}`;
           return axios(preventRequest);
         } catch (refresherror) {
-          return Promise.reject(refreshToken);
+          return Promise.reject(refresherror);
         }
       } else {
         return Promise.reject(error);
       }
     }
   );
+
+  return axiosPrivate;
 };
 
 export default useJwtInterceptors;

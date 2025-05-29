@@ -1,21 +1,19 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { axiosInstance, axiosPrivate } from "../../Api/Axios.Api";
 import {
-  convertToLocalTime,
   convertToLocalTime2,
 } from "../../Utility/Function";
-import { json, useNavigate } from "react-router-dom";
-import { RootState } from "../Store/Store";
-import useJwtInterceptors from "../../Interceptors/useJwtInterceptors";
 import axios from "axios";
 import {
   convertAMPMToISO,
-  convertTo12HourFormat,
-  generateTimeIntervals,
   hours,
 } from "../../Services/service";
-//-----------------------------------interfaces----------------------------------------//
+import { RootState } from "../Store/Store";
+import { setavailabilityExists, setqualificationExists, setspecializationExists } from "./Doctor.Redux";
+import { updateProgressBar } from "../../Sockets/Initialize_socket";
+import moment from "moment";
 
+//-----------------------------------interfaces----------------------------------------//
 export interface SignupPayload {
   name?: string;
   email?: string;
@@ -24,19 +22,17 @@ export interface SignupPayload {
   profileImage?: string | null;
   address?: string;
   role?: string;
-}
-
+};
 export interface Credentials {
   name?: string;
   email?: string;
-  password?: string;
+  password: string;
   role?: string;
   profileImage?: string;
   address?: string;
   phone?: string | Number | null;
   gender?: string;
-}
-
+};
 interface UserData {
   data: {
     address: string;
@@ -52,21 +48,17 @@ interface UserData {
     role: string;
     specialization: Array<{ field?: string; years?: number }>;
   };
-}
-
-
+};
 interface coordinates {
   latitude: number;
   longitude: number;
-}
-
+};
 interface patient {
   role: string;
   accessToken: string;
   refreshToken: string;
   userData: object;
-}
-
+};
 interface doctor {
   role: string;
   accessToken: string;
@@ -75,14 +67,13 @@ interface doctor {
   qualification: [];
   availabilityExists: [];
   specializationExists: [];
-}
-
+};
 interface UserData {
   id: string;
   name: string;
   email: string;
   role: string;
-  qualification?: any[]; // Replace `any` with the actual type if available
+  qualification?: any[];
   availability?: {
     day: string;
     start: string;
@@ -90,22 +81,19 @@ interface UserData {
   }[];
   specialization?: any[]; // Replace `any` with the actual type if available
   [key: string]: any; // For any additional dynamic fields
-}
-
+};
 interface PatientState {
   role: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   userData: UserData | null;
-}
-
+};
 interface DoctorState {
   role: string | null;
   accessToken: string | null;
   refreshToken: string | null;
   userData: UserData | null;
-}
-
+};
 // interface DoctorState {
 //   role?: string | null;
 //   accessToken?: string | null;
@@ -127,8 +115,7 @@ interface DoctorState {
 //   startTime?: string | null;
 //   endTime?: string | null;
 //   value?: boolean;
-// }
-
+// };
 interface stateManagement {
   showPassword: boolean;
   termsAccepted: boolean;
@@ -180,12 +167,10 @@ interface stateManagement {
   docisActive?: boolean;
   patientData?: PatientState;
   doctorData?: DoctorState;
-}
-
-//-----------------------------------interfaces----------------------------------------//
+};
 
 //-----------------------------------API-----------------------------------------------//
-
+let controller;
 export const signup = createAsyncThunk(
   "user/signup",
   async (formData: FormData, { dispatch, rejectWithValue }) => {
@@ -237,19 +222,46 @@ export const login = createAsyncThunk(
     { email, password, role }: SignupPayload,
     { dispatch, rejectWithValue, getState }
   ) => {
+    let response;
     try {
-      const response = await axiosInstance.post(`api/authenticate/login`, {
+      if (controller) {
+        controller.abort();
+      }
+
+      controller = new AbortController();
+      response = await axiosInstance.post(`api/authenticate/login`, {
         email,
         password,
         role,
+      }, {
+        signal: controller.signal
       });
+
       if (response) {
-        console.log(response);
         dispatch(toggleAlertCheck("User logged in"));
         dispatch(toggleStatusCheck(200));
+
+        if (response?.data?.data?.data?.role === "doctor") {
+          if (response?.data?.data?.data?.qualification?.length > 0) {
+            dispatch(setqualificationExists(true))
+          }
+
+          if (response?.data?.data?.data?.availability?.length > 0) {
+            dispatch(setavailabilityExists(true))
+          }
+
+          if (response?.data?.data?.data?.specialization?.length > 0) {
+            dispatch(setspecializationExists(true))
+          }
+
+        }
         return response?.data;
       }
     } catch (error) {
+      if (error.name === 'CanceledError') {
+        console.log('Login request canceled');
+        return rejectWithValue('Request canceled');
+      }
       const statusCode = error?.response?.status;
       if (statusCode === 400) {
         dispatch(toggleAlertCheck("Wrong credentials"));
@@ -258,11 +270,16 @@ export const login = createAsyncThunk(
         dispatch(toggleAlertCheck("User not found"));
         dispatch(toggleStatusCheck(403));
       } else if (statusCode === 401) {
-        dispatch(toggleAlertCheck("All filds are required"));
-        dispatch(toggleStatusCheck(403));
+        dispatch(toggleAlertCheck("All fields are required"));
+        dispatch(toggleStatusCheck(401));
+      } else {
+        dispatch(toggleAlertCheck("No response from the server"));
+        dispatch(toggleStatusCheck(500));
       }
       return rejectWithValue(error?.response?.data);
     }
+
+
   }
 );
 export const logout = createAsyncThunk(
@@ -295,8 +312,9 @@ export const refresh = createAsyncThunk(
   "user/refreshToken",
   async (_, { dispatch, rejectWithValue }) => {
     try {
-      const response = await axiosPrivate.get("api/authenticate/refreshToken");
-      console.log(response);
+      const response = await axiosInstance.post("api/authenticate/refreshtoken", {
+
+      });
       return response?.data;
     } catch (error) {
       const statusCode = error?.response?.status;
@@ -465,6 +483,12 @@ const signup_login = createSlice({
       }
     },
 
+    reSetCredentials: (state: any) => {
+      Object.entries(state.credentials).forEach(([key]) => {
+        state.credentials[key] = '';
+      })
+    },
+
     setHoverField: (state, action) => {
       state.hoveredField = action.payload;
     },
@@ -472,10 +496,16 @@ const signup_login = createSlice({
     progressBar: (state, action) => {
 
       if ((state.currentStep, state.totalSteps)) {
-        console.log("here in the redux")
         state.currentStep += action.payload;
-        state.proggresWidth =
-          ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
+        console.log()
+        if (state.currentStep > 4) {
+          console.log("limit reached")
+
+        } else {
+          state.proggresWidth =
+            ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
+        }
+
       }
     },
 
@@ -492,6 +522,7 @@ const signup_login = createSlice({
       state.hashedData = action.payload;
       console.log(JSON.parse(JSON.stringify(state.hashedData)));
     },
+
     set_doc_isActive: (state) => {
       state.docisActive = !state.docisActive;
     },
@@ -514,20 +545,22 @@ const signup_login = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(login.fulfilled, (state: any, action) => {
         //patient
         if (action.payload.data.data.role === "patient") {
           const patientdata = {
-            ...state.patientData, // Keep existing patient data
+            ...state.patientData,
             role: action.payload.data.data.role,
             accessToken: action.payload.data.accessToken,
             refreshToken: action.payload.data.refreshToken,
             userData: action.payload.data,
           };
           state.patientData = patientdata
+          // const date = moment(new Date()).format("MM-DD-YYYY");
+
         } else if (action.payload.data.data.role === "doctor") {
           const daoctodata = {
-            ...state.doctorData, // Keep existing doctor data
+            ...state.doctorData,
             role: action.payload.data.data.role,
             accessToken: action.payload.data.accessToken,
             refreshToken: action.payload.data.refreshToken,
@@ -536,15 +569,11 @@ const signup_login = createSlice({
           state.doctorData = daoctodata
         }
 
-
-        console.log("doctor-data->", JSON.parse(JSON.stringify(state.doctorData)))
-        console.log("patient-data->", JSON.parse(JSON.stringify(state.patientData)))
-
         if (action.payload?.data?.data?.role === "patient") {
           state.role = action?.payload?.data?.data?.role;
           state.pat_accessToken = action?.payload?.data?.accessToken;
           state.pat_refreshToken = action?.payload?.data?.refreshToken;
-          state.userData = action?.payload?.data;
+          state.userData = action?.payload?.data.data;
         } else {
           state.role = action?.payload?.data?.data?.role;
           state.doc_accessToken = action?.payload?.data?.accessToken;
@@ -578,7 +607,6 @@ const signup_login = createSlice({
           const document = state?.userData?.data?.availability?.find(
             (index: any) => index?.day === state.day
           );
-
           state.document = document;
           if (document !== undefined) {
             const starting = convertToLocalTime2(document?.start);
@@ -610,18 +638,9 @@ const signup_login = createSlice({
           state.proggresWidth =
             ((state.currentStep - 1) / (state.totalSteps - 1)) * 100;
         }
-
-        console.log(
-          "pat_accessToken->",
-          JSON.parse(JSON.stringify(state.pat_accessToken))
-        );
-        console.log(
-          "pat_accessToken->",
-          JSON.parse(JSON.stringify(state.doc_refreshToken))
-        );
       })
       .addCase(login.rejected, (state) => {
-        state.loading = true;
+        state.loading = false;
         state.error = null;
       })
       .addCase(logout.fulfilled, (state) => {
@@ -643,17 +662,44 @@ const signup_login = createSlice({
       .addCase(refresh.pending, (state) => {
         state.loading = true;
       })
-      .addCase(refresh?.fulfilled, (state, action) => {
-        console.log(action);
-        const { accessToken, refreshToken } = action?.payload;
-        state.accessToken = accessToken;
-        state.refreshToken = refreshToken;
+      .addCase(refresh?.fulfilled, (state: any, action) => {
+        const { accessToken, refreshToken, data } = action?.payload;
+
+
+        console.log(data.data)
+        if (data?.data?.role === "patient") {
+          const patientdata = {
+            ...state.patientData,
+            role: data?.data?.role,
+            accessToken: data?.ccessToken,
+            refreshToken: data?.refreshToken,
+            userData: data.data,
+          };
+          state.patientData = patientdata
+        } else if (data?.data?.role === "doctor") {
+          const daoctodata = {
+            ...state.doctorData,
+            role: data?.data?.role,
+            accessToken: data?.accessToken,
+            refreshToken: data?.refreshToken,
+            userData: data?.data,
+          };
+          state.doctorData = daoctodata
+        }
+
+        if (data?.data?.role === "patient") {
+          state.role = data?.data?.role;
+          state.pat_accessToken = data?.accessToken;
+          state.pat_refreshToken = data?.refreshToken;
+          state.userData = data?.data;
+        }
+        console.log("--------->", JSON.parse(JSON.stringify(state.role)));
       })
       .addCase(refresh?.rejected, (state) => {
         state.loading = false;
       })
-      .addCase(getAddressFromCoordinates?.fulfilled, (state, action) => {
-        state.geolocation = action.payload;
+      .addCase(getAddressFromCoordinates?.fulfilled, (state: any, action) => {
+        state.geolocation = action.payload.data;
         if (action.payload) {
           state.geolocation = action.payload;
           state.credentials.address = state.geolocation;
@@ -685,6 +731,7 @@ export const {
   set_coordinates,
   set_hashed_id,
   set_doc_isActive,
+  reSetCredentials
 } = signup_login.actions;
 
 export default signup_login.reducer;
